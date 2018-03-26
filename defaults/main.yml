@@ -6,7 +6,7 @@
 ################################################################################
 # role flags
 prometheus_skip_config: false
-promehtues_use_role_rules: false
+prometheus_use_role_rules: false
 prometheus_alertmanager_custom_config: false
 prometheus_cratedb_remote_write: false
 prometheus_cratedb_remote_read: false
@@ -16,7 +16,7 @@ prometheus_linux_arch: '{{ "amd64" if (ansible_userspace_bits == "64" ) else "38
 prometheus_linux_suffix: '{{ ansible_system | lower }}-{{ prometheus_linux_arch }}'
 prometheus_install_path: '/opt/prometheus'
 # https://github.com/prometheus/prometheus/releases/download/v1.8.0/prometheus-1.8.0.{{ prometheus_linux_suffix }}.tar.gz
-prometheus_version: 2.0.0
+prometheus_version: 2.2.1
 prometheus_pkg_url: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.{{ prometheus_linux_suffix }}.tar.gz
 
 # https://github.com/prometheus/node_exporter/releases/download/v0.15.0/node_exporter-0.15.0.{{ prometheus_linux_suffix }}.tar.gz
@@ -74,6 +74,7 @@ prometheus_opt_alertmanager_url: "http://{{ ansible_all_ipv4_addresses[0] }}:{{ 
 prometheus_opt_config_file: "{{ prometheus_conf_dir }}/prometheus.yml"
 prometheus_opt_log_format: 'logger:syslog?appname=prometheus&local=7'
 prometheus_opt_log_level: info
+prometheus_jobs: ""
 
 # listen on all ipv4 (&v6) interfaces
 prometheus_opt_listen_ip: '0.0.0.0'

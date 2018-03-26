@@ -56,8 +56,8 @@
         sample_alerts:
           src:  sample_alert.rules
           dest: sample_alert.rules
-    when: prometheus_version | version_compare('2.0.0', operator='>=')
-  when: prometheus_rule_files == ''
+    when: prometheus_version | version_compare('1.8.1', operator='<=')
+  #when: prometheus_rule_files == ''
 
 - name: "Copy rule files from playbook's, if any"
   copy:
@@ -67,7 +67,7 @@
   with_dict: '{{ prometheus_rule_files }}'
   loop_control:
       loop_var: rule
-  when: promehtues_use_role_rules
+  when: prometheus_use_role_rules
 
 - name: "Create sd_files"
   include: sd-create.yml
