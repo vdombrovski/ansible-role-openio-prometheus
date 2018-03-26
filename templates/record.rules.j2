@@ -1,0 +1,7 @@
+groups:
+  - name: {{item.name}}
+    rules:
+    {% for rule in item.rules %}
+    - record: {{rule.name}}
+      expr: {{rule.expr}}
+    {% endfor %}

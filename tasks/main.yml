@@ -8,7 +8,7 @@
   include: "install-{{ ansible_os_family }}-{{ prometheus_installation_method }}.yml"
   when: prometheus_installation_method == 'pkg'
 
-- name: "include docekr specific vars"
+- name: "include docker specific vars"
   include_vars: docker.yml
   when: prometheus_installation_method == 'docker'
 

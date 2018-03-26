@@ -57,16 +57,7 @@ prometheus_defaults_file: /etc/default/alertmanager
 prometheus_conf_dir: /etc/prometheus
 prometheus_file_sd_config_path: /etc/prometheus/targets
 prometheus_home_dir: /var/lib/prometheus
-
-prometheus_rules_dir: "{{ prometheus_conf_dir }}/alerts"
-#prometheus_rule_files:
-#  sample_alerts:
-#    src:  '{{ "sample_alert.rules.yml" if (prometheus_version | version_compare("2.0.0", "=>")) else "sample_alert.rules" }}'
-#    dest: '{{ "sample_alert.rules.yml" if (prometheus_version | version_compare("2.0.0", "=>")) else "sample_alert.rules" }}'
-  # docker_alerts:
-  #   src: docker_alerts.rules
-  #   dest: docker_alerts.rules
-
+prometheus_rules_dir: "{{ prometheus_conf_dir }}/rules"
 prometheus_storage_local_path: /var/lib/prometheus/data
 prometheus_opt_port: 9090
 
@@ -81,7 +72,7 @@ prometheus_opt_listen_ip: '0.0.0.0'
 prometheus_opt_web_listen_address: '{{ prometheus_opt_listen_ip }}:{{ prometheus_opt_port }}'
 prometheus_opt_storage_local_dirty: false
 prometheus_opt_storage_local_target_heap_size: '3221225472'
-prometheus_opt_storage_local_retention: "720h" # 1month
+prometheus_opt_storage_local_retention: "10y"
 
 prometheus_pre2_opts:
   - "web.listen-address={{ prometheus_opt_web_listen_address }}"
@@ -98,15 +89,16 @@ prometheus_opts:
   - "log.level={{ prometheus_opt_log_level }}"
   - "web.external-url=http://{{ ansible_all_ipv4_addresses[0] }}:{{ prometheus_opt_port }}"
 
+# Rules format:
+# - name: recording_rule1
+#   rules:
+#       - record: "job:metric:operation"
+#         expr: "PROMQL_QUERY"
 
-prometheus_rule_files:
-  - job_name: traefik
-    scrape_interval: 10s
-    scrape_timeout: 10s
-    static_configs:
-      - targets: ['traefik.mydomain.com:8080']
+prometheus_recording_rules: []
+
 ################################################################################
-# cusom opts for config file
+# custom opts for config file
 prometheus_alertmanager_templates_path: /etc/prometheus/am-templates
 prometheus_alertmanager_defaults_file: /etc/default/alertmanager
 prometheus_alertmanager_resolve_timeout: 5m

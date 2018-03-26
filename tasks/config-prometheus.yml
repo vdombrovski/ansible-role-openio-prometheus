@@ -41,33 +41,13 @@
     - reload prometheus
   when: prometheus_installation_method != 'docker'
 
-- block:
-  - name: "Set prometheus_rule_files [=>2.0.0]"
-    set_fact:
-      prometheus_rule_files:
-        sample_alerts:
-          src:  sample_alert.rules.yml
-          dest: sample_alert.rules.yml
-    when: prometheus_version |  version_compare('2.0.0', operator='>=')
-
-  - name: "Set prometheus_rule_files [=<1.8.1]"
-    set_fact:
-      prometheus_rule_files:
-        sample_alerts:
-          src:  sample_alert.rules
-          dest: sample_alert.rules
-    when: prometheus_version | version_compare('1.8.1', operator='<=')
-  #when: prometheus_rule_files == ''
-
-- name: "Copy rule files from playbook's, if any"
-  copy:
-    src: "{{ rule.value.src }}"
-    dest: "{{ prometheus_rules_dir }}/{{ rule.value.dest }}"
+- name: "Setup recording rules"
+  template:
+    src: record.rules.j2
+    dest: "{{ prometheus_rules_dir }}/{{ item }}.rules"
     validate: "{{ promtool_check_rules_cmd }} %s"
-  with_dict: '{{ prometheus_rule_files }}'
-  loop_control:
-      loop_var: rule
-  when: prometheus_use_role_rules
+  with_items:
+      - "{{ prometheus_recording_rules }}"
 
 - name: "Create sd_files"
   include: sd-create.yml

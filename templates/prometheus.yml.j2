@@ -8,14 +8,10 @@ global:
   external_labels:
     monitor: 'master'
 
-# Add Alert rules via prometheus_rule_files variable which is basically a source list
-# (full path or relative to roles files dir) and destination dir is what we configured in the prometheus_rules_dir
-# variable
-{% if prometheus_rule_files is defined %}
-# Rule files specifies a list of files from which rules are read.
+{% if prometheus_recording_rules | length > 0 %}
 rule_files:
-  {% for (key, value) in prometheus_rule_files.items() %}
-  - {{ prometheus_rules_dir }}/{{ value.dest }}
+  {% for rule_file in prometheus_recording_rules.items() %}
+  - "{{ prometheus_rules_dir }}/{{ rule_file }}.rules"
   {% endfor %}
 {% endif %}
 
