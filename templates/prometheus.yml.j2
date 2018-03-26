@@ -10,8 +10,8 @@ global:
 
 {% if prometheus_recording_rules | length > 0 %}
 rule_files:
-  {% for rule_file in prometheus_recording_rules.items() %}
-  - "{{ prometheus_rules_dir }}/{{ rule_file }}.rules"
+  {% for rule_file in prometheus_recording_rules %}
+  - "{{ prometheus_rules_dir }}/{{ rule_file.name }}.rules"
   {% endfor %}
 {% endif %}
 
@@ -53,13 +53,13 @@ scrape_interval: 5s
 
 {% if prometheus_jobs | length > 0 %}
 {% for job in prometheus_jobs %}
-- job_name: {{ job.name }}
-  metrics_path: '{{ job.metrics_path }}'
+- job_name: {{ job['name'] }}
+  metrics_path: '{{ job["metrics_path"] }}'
   params:
-    format: [{{ job.format if 'format' in job else 'prometheus_all_hosts' }}]
-  honor_labels: {{ job.honor_labels if 'honor_labels' in job else true }}
+    format: [{{ job['format'] if 'format' in job else 'prometheus_all_hosts' }}]
+  honor_labels: {{ job['honor_labels'] if 'honor_labels' in job else true }}
   static_configs:
-  - targets: [{{ job.targets | join(',') }}]
+  - targets: [{{ '"' + job['targets'] | join('","') + '"' }}]
 {% endfor %}
 {% endif %}
 

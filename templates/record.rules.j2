@@ -1,7 +1,7 @@
 groups:
-  - name: {{item.name}}
+  - name: {{ item.name }}
     rules:
-    {% for rule in item.rules %}
-    - record: {{rule.name}}
-      expr: {{rule.expr}}
-    {% endfor %}
+    {% for rule in item.rules -%}
+    - record: {{ rule.record }}
+      expr: {{ rule.expr }}
+    {%- endfor %}
