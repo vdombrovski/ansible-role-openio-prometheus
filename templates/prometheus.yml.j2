@@ -49,10 +49,18 @@ scrape_interval: 5s
   file_sd_configs:
     - files:
       - '{{ prometheus_file_sd_config_path }}/*.yml'
-{%endif %}
+{% endif %}
 
-{% if prometheus_jobs != '' %}
-{{ prometheus_jobs | to_yaml }}
+{% if prometheus_jobs | length > 0 %}
+{% for job in prometheus_jobs %}
+- job_name: {{ job.name }}
+  metrics_path: '{{ job.metrics_path }}'
+  params:
+    format: [{{ job.format if 'format' in job else 'prometheus_all_hosts' }}]
+  honor_labels: {{ job.honor_labels if 'honor_labels' in job else true }}
+  static_configs:
+  - targets: [{{ job.targets | join(',') }}]
+{% endfor %}
 {% endif %}
 
 {% if "crate_adapter" in prometheus_components %}

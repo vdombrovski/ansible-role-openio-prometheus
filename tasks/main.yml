@@ -18,7 +18,6 @@
 
 - name: "Configure prometheus components"
   include: "config-{{ item }}.yml"
-#  notify: "restart {{ item }}"
   when:
     - not prometheus_skip_config
     - prometheus_installation_method != 'docker'
