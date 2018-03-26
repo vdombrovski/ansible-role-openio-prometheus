@@ -100,6 +100,7 @@ prometheus_jobs: []
 
 # prometheus_recording_rules format:
 # - name: recording_rule1
+#   interval: 10s
 #   rules:
 #       - record: "job:metric:operation"
 #         expr: "PROMQL_QUERY"
