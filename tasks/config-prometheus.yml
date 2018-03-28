@@ -39,7 +39,7 @@
     dest: "{{ prometheus_systemd_dir }}/prometheus.service"
   notify:
     - reload prometheus
-  when: prometheus_installation_method != 'docker'
+  when: ansible_virtualization_type != 'docker'
 
 - name: "Setup recording rules"
   template:

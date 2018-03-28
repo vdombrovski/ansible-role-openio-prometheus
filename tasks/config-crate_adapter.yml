@@ -3,4 +3,4 @@
   template:
     src: crate_adapter.service.j2
     dest: "{{ prometheus_systemd_dir }}/crate_adapter.service"
-  when: prometheus_installation_method != 'docker'
+  when: ansible_virtualization_type != 'docker'

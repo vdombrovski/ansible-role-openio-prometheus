@@ -10,17 +10,17 @@
 
 - name: "include docker specific vars"
   include_vars: docker.yml
-  when: prometheus_installation_method == 'docker'
+  when: ansible_virtualization_type == 'docker'
 
 - name: "Include {{ prometheus_installation_method }} tasks"
   include: "install-{{ prometheus_installation_method }}.yml"
-  when: prometheus_installation_method == 'github-release' or prometheus_installation_method == 'docker'
+  when: prometheus_installation_method == 'github-release' or ansible_virtualization_type == 'docker'
 
 - name: "Configure prometheus components"
   include: "config-{{ item }}.yml"
   when:
     - not prometheus_skip_config
-    - prometheus_installation_method != 'docker'
+    - ansible_virtualization_type != 'docker'
   with_items:
     - "{{ prometheus_components }}"
 
@@ -33,7 +33,7 @@
   with_items:
     - "{{ prometheus_components }}"
   when:
-    - prometheus_installation_method != 'docker'
+    - ansible_virtualization_type != 'docker'
 
 - name: "wait until prometheus service is up - tcp"
   wait_for:
