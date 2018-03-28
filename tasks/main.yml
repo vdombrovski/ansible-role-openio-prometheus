@@ -35,6 +35,11 @@
   when:
     - ansible_virtualization_type != 'docker'
 
+- name: "Start/restart prometheus (Docker)"
+  shell: "mkdir -p {{prometheus_log_path}} && (pkill prometheus || true) && prometheus --config.file={{prometheus_opt_config_file}} > {{prometheus_log_path}}/prometheus.log 2>&1 &"
+  when:
+    - ansible_virtualization_type == 'docker'
+
 - name: "wait until prometheus service is up - tcp"
   wait_for:
     host: "{{ prometheus_opt_listen_ip }}"
