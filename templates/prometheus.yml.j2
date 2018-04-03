@@ -54,6 +54,7 @@ scrape_interval: 5s
 {% if prometheus_jobs | length > 0 %}
 {% for job in prometheus_jobs %}
 - job_name: {{ job['name'] }}
+  scrape_interval: {{ job['scrape_interval'] if 'scrape_interval' in job else '10s' }}
   metrics_path: '{{ job["metrics_path"] }}'
   params:
     format: [{{ job['format'] if 'format' in job else 'prometheus_all_hosts' }}]
