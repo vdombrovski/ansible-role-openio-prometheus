@@ -10,39 +10,42 @@ prometheus_use_role_rules: false
 prometheus_alertmanager_custom_config: false
 prometheus_cratedb_remote_write: false
 prometheus_cratedb_remote_read: false
-prometheus_installation_method: 'github-release' # pkg, github-release, docker [WIP]
+prometheus_installation_method: 'github-release'
 
 prometheus_linux_arch: '{{ "amd64" if (ansible_userspace_bits == "64" ) else "386" }}'
 prometheus_linux_suffix: '{{ ansible_system | lower }}-{{ prometheus_linux_arch }}'
 prometheus_install_path: '/opt/prometheus'
-# https://github.com/prometheus/prometheus/releases/download/v1.8.0/prometheus-1.8.0.{{ prometheus_linux_suffix }}.tar.gz
 prometheus_version: 2.2.1
-prometheus_pkg_url: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.{{ prometheus_linux_suffix }}.tar.gz
+prometheus_pkg_url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/\
+                     prometheus-{{ prometheus_version }}.{{ prometheus_linux_suffix }}.tar.gz"
 
-# https://github.com/prometheus/node_exporter/releases/download/v0.15.0/node_exporter-0.15.0.{{ prometheus_linux_suffix }}.tar.gz
 prometheus_node_exporter_version: 0.15.1
-prometheus_node_exporter_pkg_url: https://github.com/prometheus/node_exporter/releases/download/v{{ prometheus_node_exporter_version }}/node_exporter-{{ prometheus_node_exporter_version }}.{{ prometheus_linux_suffix }}.tar.gz
+prometheus_node_exporter_pkg_url: "https://github.com/prometheus/node_exporter/releases/download/\
+                                   v{{ prometheus_node_exporter_version }}/\
+                                   node_exporter-{{ prometheus_node_exporter_version }}\
+                                   .{{ prometheus_linux_suffix }}.tar.gz"
 
-# https://github.com/prometheus/alertmanager/releases/download/v0.9.1/alertmanager-0.9.1.{{ prometheus_linux_suffix }}.tar.gz
 prometheus_alertmanager_version: 0.11.0
-prometheus_alertmanager_pkg_url: https://github.com/prometheus/alertmanager/releases/download/v{{ prometheus_alertmanager_version }}/alertmanager-{{ prometheus_alertmanager_version }}.{{ prometheus_linux_suffix }}.tar.gz
+prometheus_alertmanager_pkg_url: https://github.com/prometheus/alertmanager/releases/download/v\
+                                 {{ prometheus_alertmanager_version }}/\
+                                 alertmanager-{{ prometheus_alertmanager_version }}.{{ prometheus_linux_suffix }}.tar.gz
 
-# https://github.com/prometheus/pushgateway/releases/download/v0.4.0/pushgateway-0.4.0.linux-amd64.tar.gz
 prometheus_pushgateway_version: 0.4.0
-prometheus_pushgateway_pkg_url: https://github.com/prometheus/pushgateway/releases/download/v{{ prometheus_pushgateway_version }}/pushgateway-{{ prometheus_pushgateway_version }}.{{ prometheus_linux_suffix }}.tar.gz
+prometheus_pushgateway_pkg_url: https://github.com/prometheus/pushgateway/releases/download/\
+                                v{{ prometheus_pushgateway_version }}/\
+                                pushgateway-{{ prometheus_pushgateway_version }}.{{ prometheus_linux_suffix }}.tar.gz
 
-# https://cdn.crate.io/downloads/dist/prometheus/crate_adapter-0.1-2017100611-d24e213.linux.amd64.tar.gz
 prometheus_crate_adapter_version: 0.1-2017100611-d24e213
-prometheus_crate_adapter_pkg_url: https://cdn.crate.io/downloads/dist/prometheus/crate_adapter-{{ prometheus_crate_adapter_version }}.{{ ansible_system|lower }}.{{ prometheus_linux_arch }}.tar.gz
+prometheus_crate_adapter_pkg_url: https://cdn.crate.io/downloads/dist/prometheus/\
+                                  crate_adapter-{{ prometheus_crate_adapter_version }}\
+                                  .{{ ansible_system|lower }}.{{ prometheus_linux_arch }}.tar.gz
 
-# https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v1.0.2/elasticsearch_exporter-1.0.2.linux-amd64.tar.gz
 prometheus_elasticsearch_exporter_version: 1.0.2
-prometheus_elasticsearch_exporter_pkg_url: https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v{{ prometheus_elasticsearch_exporter_version }}/elasticsearch_exporter-{{ prometheus_elasticsearch_exporter_version }}.{{ prometheus_linux_suffix }}.tar.gz
+prometheus_elasticsearch_exporter_pkg_url: https://github.com/justwatchcom/elasticsearch_exporter/releases/download/\
+                                           v{{ prometheus_elasticsearch_exporter_version }}/\
+                                           elasticsearch_exporter-{{ prometheus_elasticsearch_exporter_version }}\
+                                           .{{ prometheus_linux_suffix }}.tar.gz
 
-# docker related
-
-
-# default components
 prometheus_components:
   - alertmanager
   - node_exporter
@@ -90,19 +93,19 @@ prometheus_opts:
   - "web.external-url=http://{{ ansible_all_ipv4_addresses[0] }}:{{ prometheus_opt_port }}"
 
 # prometheus_jobs format:
-# - name: example_job
-#   format: prometheus_all_hosts
-#   metrics_path: '/metrics'
-#   honor_labels: true
-#   targets:
+#   - name: example_job
+#     format: prometheus_all_hosts
+#     metrics_path: '/metrics'
+#     honor_labels: true
+#     targets:
 #       - "192.168.1.2:1234"
 #       - "192.168.1.3:1234"
 prometheus_jobs: []
 
 # prometheus_recording_rules format:
-# - name: recording_rule1
-#   interval: 10s
-#   rules:
+#   - name: recording_rule1
+#     interval: 10s
+#     rules:
 #       - record: "job:metric:operation"
 #         expr: "PROMQL_QUERY"
 prometheus_recording_rules: []
@@ -132,25 +135,26 @@ prometheus_alertmanager_hipchat_auth_token: ''
 
 prometheus_alertmanager_default_receiever: ''
 prometheus_alertmanager_recievers:
- receivers:
-   - name: 'slack'
-     slack_configs:
-     - channel: '#your_channel'
-       send_resolved: true
-       api_url: https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXTJoXXXXXXXXX
+  receivers:
+    - name: 'slack'
+      slack_configs:
+        - channel: '#your_channel'
+          send_resolved: true
+          api_url: https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXTJoXXXXXXXXX
 prometheus_alertmanager_routes:
- route:
-   group_by: [ 'alertname', 'cluster', 'service' ]
-   group_wait: 30s
-   group_interval: 5m
-   receiver: slack
+  route:
+    group_by: [ 'alertname', 'cluster', 'service' ]
+    group_wait: 30s
+    group_interval: 5m
+    receiver: slack
 prometheus_alertmanager_inhibit_rules: ''
 
-prometheus_alertmanager_opt_resolve_timeout:
-prometheus_alertmanager_opt_protocol: http # http/https
+prometheus_alertmanager_opt_resolve_timeout: ""
+prometheus_alertmanager_opt_protocol: http
 prometheus_alertmanager_opt_port: 9093
 prometheus_alertmanager_opt_listen_ip: '0.0.0.0'
-prometheus_alertmanager_opt_web_listen_address: '{{ prometheus_alertmanager_opt_listen_ip }}:{{ prometheus_alertmanager_opt_port }}'
+prometheus_alertmanager_opt_web_listen_address: "{{ prometheus_alertmanager_opt_listen_ip }}:\
+                                                 {{ prometheus_alertmanager_opt_port }}"
 
 # official commandline args
 prometheus_alertmanager_config_file: /etc/prometheus/alertmanager.yml
@@ -160,14 +164,14 @@ prometheus_alertmanager_config_file: /etc/prometheus/alertmanager.yml
 prometheus_alertmanager_log_format: "logger:syslog?appname=alertmanager&local=7"
 # valid levels: [debug, info, warn, error, fatal] (default "info")
 prometheus_alertmanager_log_level: info
-# prometheus_alertmanager_mesh_listen_address:
-# prometheus_alertmanager_mesh_nickname:
-# prometheus_alertmanager_mesh_password:
-# prometheus_alertmanager_mesh_peer:
-# prometheus_alertmanager_mesh_peer_id:
+# prometheus_alertmanager_mesh_listen_address: ""
+# prometheus_alertmanager_mesh_nickname: ""
+# prometheus_alertmanager_mesh_password: ""
+# prometheus_alertmanager_mesh_peer: ""
+# prometheus_alertmanager_mesh_peer_id: ""
 prometheus_alertmanager_storage_path: /var/lib/prometheus/alertmanager
 prometheus_alertmanager_web_external_url: '{{ prometheus_alertmanager_opt_web_listen_address }}'
-prometheus_alertmanager_web_listen_address:
+prometheus_alertmanager_web_listen_address: ""
 prometheus_alertmanager_web_route_prefix: '{{ prometheus_alertmanager_web_external_url }}'
 
 prometheus_alertmanager_pre2_opts:
@@ -185,7 +189,8 @@ prometheus_alertmanager_opts:
 prometheus_node_exporter_defaults_file: /etc/default/node_exporter
 prometheus_node_exporter_opt_port: 9100
 prometheus_node_exporter_opt_listen_ip: '0.0.0.0'
-prometheus_node_exporter_opt_web_listen_address: '{{ prometheus_node_exporter_opt_listen_ip }}:{{ prometheus_node_exporter_opt_port }}'
+prometheus_node_exporter_opt_web_listen_address: "{{ prometheus_node_exporter_opt_listen_ip }}:\
+                                                  {{ prometheus_node_exporter_opt_port }}"
 prometheus_node_exporter_opt_log_format: 'logger:syslog?appname=node_exporter&local=7'
 prometheus_node_exporter_opts:
   - "web.listen-address={{ prometheus_node_exporter_opt_web_listen_address }}"
@@ -200,9 +205,10 @@ prometheus_pushgateway_conf_file: /etc/prometheus/alertmanager.yml
 prometheus_pushgateway_opt_port: 9091
 prometheus_pushgateway_web_telemetry_path: '/metrics'
 prometheus_pushgateway_opt_listen_ip: '0.0.0.0'
-prometheus_pushgateway_opt_web_listen_address: '{{ prometheus_pushgateway_opt_listen_ip }}:{{ prometheus_pushgateway_opt_port }}'
+prometheus_pushgateway_opt_web_listen_address: "{{ prometheus_pushgateway_opt_listen_ip }}:\
+                                                {{ prometheus_pushgateway_opt_port }}"
 prometheus_pushgateway_opt_log_format: 'logger:syslog?appname=pushgateway&local=7'
-prometheus_pushgateway_opt_log_level:
+prometheus_pushgateway_opt_log_level: ""
 prometheus_pushgateway_opts:
   - "web.listen-address={{ prometheus_pushgateway_opt_web_listen_address }}"
   - "log.format={{ prometheus_pushgateway_opt_log_format }}"
@@ -216,18 +222,13 @@ prometheus_elasticsearch_exporter_defaults_file: /etc/default/elasticsearch_expo
 prometheus_elasticsearch_exporter_conf_file: /etc/prometheus/elasticsearch_exporter.yml
 prometheus_elasticsearch_exporter_opt_port: 9108
 prometheus_elasticsearch_exporter_opt_listen_ip: '0.0.0.0'
-prometheus_elasticsearch_exporter_opt_web_listen_address: '{{ prometheus_elasticsearch_exporter_opt_listen_ip }}:{{ prometheus_elasticsearch_exporter_opt_port }}'
+prometheus_elasticsearch_exporter_opt_web_listen_address: "{{ prometheus_elasticsearch_exporter_opt_listen_ip }}:\
+                                                           {{ prometheus_elasticsearch_exporter_opt_port }}"
 prometheus_elasticsearch_exporter_default_es: http://127.0.0.1:9200
-#prometheus_alertmanager_opt_log_format: '{{ "logger:syslog?appname=alertmanager&local=7" if (prometheus_version | version_compare("2.0.0", "=>")) else " " }}'
 
 prometheus_elasticsearch_exporter_opts:
   - "web.listen-address={{ prometheus_elasticsearch_exporter_opt_web_listen_address }}"
   - "es.uri={{ prometheus_elasticsearch_exporter_default_es }}"
-
-# alertmanager config options
-# prometheus_alertmanager_resolve_timeout
-
-
 
 ################################################################################
 # crate_adapter
@@ -235,13 +236,16 @@ prometheus_elasticsearch_exporter_opts:
 prometheus_crate_adapter_defaults_file: /etc/default/crate_adapter
 prometheus_crate_adapter_opt_port: 9268
 prometheus_crate_adapter_opt_listen_ip: '0.0.0.0'
-prometheus_crate_adapter_opt_web_listen_address: '{{ prometheus_crate_adapter_opt_listen_ip }}:{{ prometheus_crate_adapter_opt_port }}'
+prometheus_crate_adapter_opt_web_listen_address: "{{ prometheus_crate_adapter_opt_listen_ip }}:\
+                                                  {{ prometheus_crate_adapter_opt_port }}"
 prometheus_crate_adapter_opt_log_format: 'logger:syslog?appname=crate_adapter&local=7'
 prometheus_crate_adapter_opt_log_level: info
 prometheus_crate_adapter_opt_cratedb_addr: "{{ cratedb_addr | d('localhost') }}"
 prometheus_crate_adapter_opt_cratedb_port: "{{ cratedb_port | d('4200') }}"
 prometheus_crate_adapter_opts:
-  - "crate.url=http://{{ prometheus_crate_adapter_opt_cratedb_addr }}:{{ prometheus_crate_adapter_opt_cratedb_port }}/_sql"
+  - "crate.url=http://{{ prometheus_crate_adapter_opt_cratedb_addr }}:\
+     {{ prometheus_crate_adapter_opt_cratedb_port }}/_sql"
   - "web.listen-address={{ prometheus_crate_adapter_opt_web_listen_address }}"
   - "log.format={{ prometheus_crate_adapter_opt_log_format }}"
   - "log.level={{ prometheus_crate_adapter_opt_log_level }}"
+...

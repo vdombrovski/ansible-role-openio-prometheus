@@ -27,16 +27,27 @@
 - name: "Enable / Start prometheus components"
   systemd:
     state: restarted
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     name: "{{ item }}"
   with_items:
     - "{{ prometheus_components }}"
   when:
     - ansible_virtualization_type != 'docker'
 
+- name: Initialize prometheus log directory (Docker)
+  file:
+    path: "{{prometheus_log_path}}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+  when:
+    - ansible_virtualization_type == 'docker'
+
 - name: "Start/restart prometheus (Docker)"
-  shell: "mkdir -p {{prometheus_log_path}} && (pkill prometheus || true) && prometheus --config.file={{prometheus_opt_config_file}} > {{prometheus_log_path}}/prometheus.log 2>&1 &"
+  shell: "(pkill prometheus || true) && prometheus --config.file={{prometheus_opt_config_file}} > \
+          {{prometheus_log_path}}/prometheus.log 2>&1 &"
   when:
     - ansible_virtualization_type == 'docker'
 
@@ -81,3 +92,4 @@
     port: "{{ prometheus_crate_adapter_opt_port }}"
     delay: 10
   when: "'crate_adapter' in prometheus_components"
+...

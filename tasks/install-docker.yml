@@ -41,3 +41,4 @@
   register: swarm_stack_stdout
   with_items:
     - docker-compose.yml
+...

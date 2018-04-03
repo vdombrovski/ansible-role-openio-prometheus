@@ -1,7 +1,0 @@
----
-#- src: shelleg.epel
-- src: shelleg.ntp
-#- src: shelleg.cratedb
-#- src: https://github.com/shelleg/ansible-role-simple-docker-daemon.git
-#  name: shelleg.simple-docker-daemon
-#- src: shelleg.cratedb

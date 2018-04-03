@@ -1,5 +1,4 @@
 ---
-
 prometheus_stack_name: prometheus
 prometheus_service_name: prometheus
 prometheus_image_name: 'prom/prometheus'
@@ -18,3 +17,4 @@ prometheus_cadvisor_image_name: 'google/cadvisor'
 prometheus_grafana_version: 4.6.2
 prometheus_grafana_service_name: cadvisor
 prometheus_grafana_image_name: 'google/cadvisor'
+...

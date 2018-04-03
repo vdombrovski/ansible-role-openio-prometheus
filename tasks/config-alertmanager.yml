@@ -15,17 +15,19 @@
   with_items:
     - "{{ prometheus_alertmanager_templates_path }}"
   loop_control:
-      loop_var: dirname
+    loop_var: dirname
 
 - name: "Use alertmanager sample configuration"
   copy:
     remote_src: true
-    src: "{{ prometheus_install_path }}/alertmanager-{{ prometheus_alertmanager_version }}.{{ prometheus_linux_suffix }}/simple.yml"
+    src: "{{ prometheus_install_path }}/alertmanager-{{ prometheus_alertmanager_version }}\
+          .{{ prometheus_linux_suffix }}/simple.yml"
     dest: "{{ prometheus_alertmanager_config_file }}"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     validate: "amtool check-config %s"
-  when: not prometheus_alertmanager_custom_config and (prometheus_installation_method == 'github-release' or ansible_virtualization_type == 'docker')
+  when: not prometheus_alertmanager_custom_config and
+        (prometheus_installation_method == 'github-release' or ansible_virtualization_type == 'docker')
 
 
 - name: "Copy slack.tmpl to {{ prometheus_alertmanager_templates_path }}"
@@ -46,3 +48,4 @@
     group: "{{ prometheus_group }}"
     validate: "amtool check-config %s"
   when: prometheus_alertmanager_custom_config
+...

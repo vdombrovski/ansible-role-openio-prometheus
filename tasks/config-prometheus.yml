@@ -1,19 +1,17 @@
 ---
 - name: "Set promtool flags based on version"
   block:
-  - set_fact:
-      promtool_check_config_cmd: 'promtool check-config'
-
-  - set_fact:
-      promtool_check_rules_cmd: 'promtool check-rules'
+    - set_fact:
+        promtool_check_config_cmd: 'promtool check-config'
+    - set_fact:
+        promtool_check_rules_cmd: 'promtool check-rules'
   when: prometheus_version |  version_compare('1.8.1', operator='<=')
 
 - block:
-  - set_fact:
-      promtool_check_config_cmd: 'promtool check config'
-
-  - set_fact:
-      promtool_check_rules_cmd: 'promtool check rules'
+    - set_fact:
+        promtool_check_config_cmd: 'promtool check config'
+    - set_fact:
+        promtool_check_rules_cmd: 'promtool check rules'
   when: prometheus_version |  version_compare('1.8.1', operator='>')
 
 - debug:
@@ -31,7 +29,7 @@
     - "{{ prometheus_rules_dir }}"
     - "{{ prometheus_alertmanager_templates_path }}"
   loop_control:
-      loop_var: dirname
+    loop_var: dirname
 
 - name: "set prometheus service"
   template:
@@ -47,7 +45,7 @@
     dest: "{{ prometheus_rules_dir }}/{{ item.name }}.rules"
     validate: "{{ promtool_check_rules_cmd }} %s"
   with_items:
-      - "{{ prometheus_recording_rules }}"
+    - "{{ prometheus_recording_rules }}"
 
 - name: "Create sd_files"
   include: sd-create.yml
@@ -65,3 +63,4 @@
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     validate: "{{ promtool_check_config_cmd }} %s"
+...

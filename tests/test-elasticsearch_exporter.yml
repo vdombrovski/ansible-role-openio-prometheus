@@ -1,8 +1,0 @@
----
-- hosts: all
-  become: true
-  roles:
-    - role: role_under_test
-    # - role: ../../
-      prometheus_components:
-        - elasticsearch_exporter
