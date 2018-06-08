@@ -1,0 +1,24 @@
+- labels:
+    module: icmpcheck
+  targets:
+    - 192.168.1.146=>192.168.1.164
+
+- labels:
+    module: tcpcheck
+  targets:
+    - 192.168.1.164=>192.168.1.165:6000
+
+- labels:
+    module: zookeeper
+  targets:
+    - 192.168.1.164=>10.0.0.4:6005
+
+- labels:
+    module: metax
+  targets:
+    - 192.168.1.164=>10.0.0.3:6006,10.0.0.4:6121
+
+- labels:
+    module: account
+  targets:
+    - 192.168.1.164=>10.0.0.4:6009

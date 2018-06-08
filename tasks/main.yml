@@ -1,95 +1,79 @@
 ---
 # tasks file for ansible-role-prometheus
 
-- name: "Include {{ ansible_os_family }} vars"
-  include_vars: "{{ ansible_os_family }}.yml"
+- block:
 
-- name: "Include {{ ansible_os_family }} tasks"
-  include: "install-{{ ansible_os_family }}-{{ prometheus_installation_method }}.yml"
-  when: prometheus_installation_method == 'pkg'
+    - name: "Perform service autodiscovery"
+      include: "autodiscovery.yml"
 
-- name: "include docker specific vars"
-  include_vars: docker.yml
-  when: ansible_virtualization_type == 'docker'
+    - name: "Show result"
+      debug:
+        msg: hostvars[{{item}}]['bb_service_ports']
+      with_items: "{{groups[prometheus_monitored_group]}}"
+  when: prometheus_monitored_group in group_names
 
-- name: "Include {{ prometheus_installation_method }} tasks"
-  include: "install-{{ prometheus_installation_method }}.yml"
-  when: prometheus_installation_method == 'github-release' or ansible_virtualization_type == 'docker'
+- block:
+    - name: "Include {{ ansible_os_family }} vars"
+      include_vars: "{{ ansible_os_family }}.yml"
 
-- name: "Configure prometheus components"
-  include: "config-{{ item }}.yml"
-  when:
-    - not prometheus_skip_config
-    - ansible_virtualization_type != 'docker'
-  with_items:
-    - "{{ prometheus_components }}"
+    - name: "Include {{ ansible_os_family }} tasks"
+      include: "install-{{ ansible_os_family }}-{{ prometheus_installation_method }}.yml"
+      when: prometheus_installation_method == 'pkg'
 
-- name: "Enable / Start prometheus components"
-  systemd:
-    state: restarted
-    daemon_reload: true
-    enabled: true
-    name: "{{ item }}"
-  with_items:
-    - "{{ prometheus_components }}"
-  when:
-    - ansible_virtualization_type != 'docker'
+    - name: "include docker specific vars"
+      include_vars: docker.yml
+      when: ansible_virtualization_type == 'docker'
 
-- name: Initialize prometheus log directory (Docker)
-  file:
-    path: "{{prometheus_log_path}}"
-    owner: root
-    group: root
-    mode: 0755
-    state: directory
-  when:
-    - ansible_virtualization_type == 'docker'
+    - name: "Include {{ prometheus_installation_method }} tasks"
+      include: "install-{{ prometheus_installation_method }}.yml"
+      when: prometheus_installation_method == 'github-release' or ansible_virtualization_type == 'docker'
 
-- name: "Start/restart prometheus (Docker)"
-  shell: "(pkill prometheus || true) && prometheus --config.file={{prometheus_opt_config_file}} > \
-          {{prometheus_log_path}}/prometheus.log 2>&1 &"
-  when:
-    - ansible_virtualization_type == 'docker'
+    - name: "Configure prometheus components"
+      include: "config-{{ item }}.yml"
+      when:
+        - not prometheus_skip_config
+        - ansible_virtualization_type != 'docker'
+      with_items:
+        - "{{ prometheus_components }}"
 
-- name: "wait until prometheus service is up - tcp"
-  wait_for:
-    host: "{{ prometheus_opt_listen_ip }}"
-    port: "{{ prometheus_opt_port }}"
-    delay: 10
-  when: "'prometheus' in prometheus_components"
+    - name: "Enable / Start prometheus components"
+      systemd:
+        state: restarted
+        daemon_reload: true
+        enabled: true
+        name: "{{ item }}"
+      with_items:
+        - "{{ prometheus_components }}"
+      when:
+        - ansible_virtualization_type != 'docker'
 
-- name: "wait until alertmanager service is up - tcp"
-  wait_for:
-    host: "{{ prometheus_alertmanager_opt_listen_ip }}"
-    port: "{{ prometheus_alertmanager_opt_port }}"
-    delay: 10
-  when: "'alertmanager' in prometheus_components"
+    - name: Initialize prometheus log directory (Docker)
+      file:
+        path: "{{prometheus_log_path}}"
+        owner: root
+        group: root
+        mode: 0755
+        state: directory
+      when:
+        - ansible_virtualization_type == 'docker'
 
-- name: "wait until node_exporter service is up - tcp"
-  wait_for:
-    host: "{{ prometheus_node_exporter_opt_listen_ip }}"
-    port: "{{ prometheus_node_exporter_opt_port }}"
-    delay: 10
-  when: "'node_exporter' in prometheus_components"
+    - name: "Start/restart prometheus (Docker)"
+      shell: "(pkill prometheus || true) && prometheus --config.file={{prometheus_opt_config_file}} > \
+              {{prometheus_log_path}}/prometheus.log 2>&1 &"
+      when:
+        - ansible_virtualization_type == 'docker'
 
-- name: "wait until elasticsearch_exporter service is up - tcp"
-  wait_for:
-    host: "{{ prometheus_elasticsearch_exporter_opt_listen_ip }}"
-    port: "{{ prometheus_elasticsearch_exporter_opt_port }}"
-    delay: 10
-  when: "'elasticsearch_exporter' in prometheus_components"
-
-- name: "wait until pushgateway service is up - tcp"
-  wait_for:
-    host: "{{ prometheus_pushgateway_opt_listen_ip }}"
-    port: "{{ prometheus_pushgateway_opt_port }}"
-    delay: 10
-  when: "'pushgateway' in prometheus_components"
-
-- name: "wait until crate_adapter service is up - tcp"
-  wait_for:
-    host: "{{ prometheus_crate_adapter_opt_listen_ip }}"
-    port: "{{ prometheus_crate_adapter_opt_port }}"
-    delay: 10
-  when: "'crate_adapter' in prometheus_components"
+    - name: "wait until prometheus service is up - tcp"
+      wait_for:
+        host: "{{ prometheus_opt_listen_ip }}"
+        port: "{{ prometheus_opt_port }}"
+        delay: 10
+      when: "'prometheus' in prometheus_components"
+  when: prometheus_admin_group in group_names
+  # - name: "wait until alertmanager service is up - tcp"
+  #   wait_for:
+  #     host: "{{ prometheus_alertmanager_opt_listen_ip }}"
+  #     port: "{{ prometheus_alertmanager_opt_port }}"
+  #     delay: 10
+  #   when: "'alertmanager' in prometheus_components"
 ...

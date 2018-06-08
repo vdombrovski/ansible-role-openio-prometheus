@@ -74,3 +74,53 @@ remote_read:
    - url: http://{{ prometheus_crate_adapter_opt_listen_ip }}:{{ prometheus_crate_adapter_opt_port }}/read
 {% endif %}
 {% endif %}
+
+{% if 'blackbox' in prometheus_components %}
+- job_name: 'blackbox'
+  scrape_interval: {{prometheus_blackbox_scrape}}
+  metrics_path: /probe
+  file_sd_configs:
+    - files:
+        - '{{prometheus_conf_dir}}/targets/blackbox/*.yml'
+  relabel_configs:
+    # Module replacements
+    - source_labels: [module]
+      target_label: __param_module
+    # Job replacements
+    - source_labels: [module]
+      target_label: job
+
+    # Target replacements
+    - source_labels: [module, __address__]
+      regex: ^[icmpcheck|tcpcheck|zookeeper].*;(.*)\=\>(.*)
+      replacement: ${2}
+      target_label: __param_target
+
+    - source_labels: [module, __address__]
+      regex: ^[account].*;(.*)\=\>(.*)
+      replacement: http://${2}/status
+      target_label: __param_target
+
+    - source_labels: [module, __address__]
+      regex: ^[metax].*;(.*)=>(.*),(.*)
+      replacement: http://${2}/v3.0/forward/stats?id=${3}
+      target_label: __param_target
+
+    # Address replacements
+    - source_labels: [__address__]
+      regex: (.*)\=\>(.*)
+      replacement: ${1}:{{prometheus_blackbox_port}}
+      target_label: __address__
+
+    # Instance replacements
+    - source_labels: [__param_target]
+      target_label: instance
+    - source_labels: [module, __param_target]
+      regex: ^[account].*;.*://(.*)/.*
+      replacement: ${1}
+      target_label: instance
+    - source_labels: [module, __param_target]
+      regex: ^[metax].*;(.*)?id=(.*)
+      replacement: ${2}
+      target_label: instance
+{% endif %}
