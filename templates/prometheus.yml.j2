@@ -75,7 +75,7 @@ remote_read:
 {% endif %}
 {% endif %}
 
-{% if 'blackbox' in prometheus_components %}
+{% if prometheus_blackbox_enabled %}
 - job_name: 'blackbox'
   scrape_interval: {{prometheus_blackbox_scrape}}
   metrics_path: /probe
@@ -92,13 +92,18 @@ remote_read:
 
     # Target replacements
     - source_labels: [module, __address__]
-      regex: ^[icmpcheck|tcpcheck|zookeeper].*;(.*)\=\>(.*)
+      regex: ^[icmpcheck|tcpcheck|zookeeper|oioproxy].*;(.*)\=\>(.*)
       replacement: ${2}
       target_label: __param_target
 
     - source_labels: [module, __address__]
       regex: ^[account].*;(.*)\=\>(.*)
       replacement: http://${2}/status
+      target_label: __param_target
+
+    - source_labels: [module, __address__]
+      regex: ^[oioproxy].*;(.*)\=\>(.*)
+      replacement: http://${2}/v3.0/status
       target_label: __param_target
 
     - source_labels: [module, __address__]
@@ -116,7 +121,7 @@ remote_read:
     - source_labels: [__param_target]
       target_label: instance
     - source_labels: [module, __param_target]
-      regex: ^[account].*;.*://(.*)/.*
+      regex: ^[account|oioproxy].*;.*://(.*)/.*
       replacement: ${1}
       target_label: instance
     - source_labels: [module, __param_target]

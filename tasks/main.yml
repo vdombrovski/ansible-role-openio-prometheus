@@ -2,7 +2,6 @@
 # tasks file for ansible-role-prometheus
 
 - block:
-
     - name: "Perform service autodiscovery"
       include: "autodiscovery.yml"
 
@@ -17,7 +16,7 @@
       include_vars: "{{ ansible_os_family }}.yml"
 
     - name: "Include {{ ansible_os_family }} tasks"
-      include: "install-{{ ansible_os_family }}-{{ prometheus_installation_method }}.yml"
+      include: "install/{{ ansible_os_family }}-{{ prometheus_installation_method }}.yml"
       when: prometheus_installation_method == 'pkg'
 
     - name: "include docker specific vars"
@@ -25,8 +24,25 @@
       when: ansible_virtualization_type == 'docker'
 
     - name: "Include {{ prometheus_installation_method }} tasks"
-      include: "install-{{ prometheus_installation_method }}.yml"
+      include: "install/{{ prometheus_installation_method }}.yml"
       when: prometheus_installation_method == 'github-release' or ansible_virtualization_type == 'docker'
+
+    # CONFIGURATION - BLACKBOX
+
+    - name: "Create blackbox targets directory"
+      file:
+        path: "{{ prometheus_conf_dir }}/targets/blackbox"
+        state: directory
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_group }}"
+        mode: 0755
+      when: "{{ prometheus_blackbox_enabled }}"
+
+    - name: "Generate blackbox targets"
+      template:
+        src: blackbox.yml.j2
+        dest: "{{ prometheus_conf_dir }}/targets/blackbox/openio.yml"
+      when: "{{ prometheus_blackbox_enabled }}"
 
     - name: "Configure prometheus components"
       include: "config-{{ item }}.yml"
@@ -35,6 +51,8 @@
         - ansible_virtualization_type != 'docker'
       with_items:
         - "{{ prometheus_components }}"
+
+    # CONFIGURATION - PROMETHEUS
 
     - name: "Enable / Start prometheus components"
       systemd:
@@ -56,6 +74,8 @@
         state: directory
       when:
         - ansible_virtualization_type == 'docker'
+
+    # START
 
     - name: "Start/restart prometheus (Docker)"
       shell: "(pkill prometheus || true) && prometheus --config.file={{prometheus_opt_config_file}} > \

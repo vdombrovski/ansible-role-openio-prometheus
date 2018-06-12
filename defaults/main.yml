@@ -88,8 +88,11 @@ prometheus_jobs: []
 #         expr: "PROMQL_QUERY"
 
 prometheus_monitored_group: openio
+prometheus_monitored_iface: eth0
 prometheus_admin_group: admin
+prometheus_admin_iface: eth0
 
+prometheus_blackbox_enabled: true
 prometheus_blackbox_scrape: 10s
 prometheus_blackbox_port: 9115
 prometheus_blackbox_services:
@@ -98,17 +101,8 @@ prometheus_blackbox_services:
   - meta2
   - rawx
   - zookeeper
-
-#
-# [openio_directory_m0]
-# 192.168.1.205
-# 192.168.1.206
-# 192.168.1.207
-#
-# [openio_directory_m1]
-# 192.168.1.205
-# 192.168.1.206
-# 192.168.1.207
+  - oioproxy
+  - account
 
 ################################################################################
 # custom opts for config file
