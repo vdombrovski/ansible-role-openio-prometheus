@@ -92,7 +92,7 @@ remote_read:
 
     # Target replacements
     - source_labels: [module, __address__]
-      regex: ^[icmpcheck|tcpcheck|zookeeper|oioproxy].*;(.*)\=\>(.*)
+      regex: ^[icmpcheck|tcpcheck|zookeeper|beanstalkd|redis|oioproxy|rdir].*;(.*)\=\>(.*)
       replacement: ${2}
       target_label: __param_target
 
@@ -126,7 +126,7 @@ remote_read:
     - source_labels: [__param_target]
       target_label: instance
     - source_labels: [module, __param_target]
-      regex: ^[account|oioproxy|rawx].*;.*://(.*)/.*
+      regex: ^[account|oioproxy|rawx|rdir].*;.*://(.*)/.*
       replacement: ${1}
       target_label: instance
     - source_labels: [module, __param_target]
