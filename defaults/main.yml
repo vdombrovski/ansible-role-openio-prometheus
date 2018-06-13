@@ -95,6 +95,7 @@ prometheus_admin_iface: eth0
 prometheus_blackbox_enabled: true
 prometheus_blackbox_scrape: 10s
 prometheus_blackbox_port: 9115
+prometheus_blackbox_zk_port_regex: "^(60)[0-9]+$"
 
 
 ################################################################################
