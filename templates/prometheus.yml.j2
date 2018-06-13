@@ -92,12 +92,17 @@ remote_read:
 
     # Target replacements
     - source_labels: [module, __address__]
-      regex: ^[icmpcheck|tcpcheck|zookeeper|beanstalkd|redis|oioproxy|rdir].*;(.*)\=\>(.*)
+      regex: ^[icmpcheck|tcpcheck|zookeeper|beanstalkd|redis|oioproxy].*;(.*)\=\>(.*)
       replacement: ${2}
       target_label: __param_target
 
     - source_labels: [module, __address__]
       regex: ^account;(.*)\=\>(.*)
+      replacement: http://${2}/status
+      target_label: __param_target
+
+    - source_labels: [module, __address__]
+      regex: ^rdir;(.*)\=\>(.*)
       replacement: http://${2}/status
       target_label: __param_target
 
