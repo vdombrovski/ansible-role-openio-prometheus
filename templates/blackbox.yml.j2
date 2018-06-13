@@ -9,7 +9,7 @@
     module: tcpcheck
   targets:
     {% for host in groups[prometheus_monitored_group] -%}
-    {%- set loop_next = groups[prometheus_monitored_group][0] if loop.last else loop.nextitem -%}
+    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for sc, ports in hostvars[loop_next]['bb_service_ports'].items() -%}
     {% for port in ports -%}
     - {{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
@@ -21,7 +21,7 @@
     module: metax
   targets:
     {% for host in groups[prometheus_monitored_group] -%}
-    {%- set loop_next = groups[prometheus_monitored_group][0] if loop.last else loop.nextitem -%}
+    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for sc, ports in hostvars[loop_next]['bb_service_ports'].items() if sc.startswith('meta') -%}
     {% for port in ports -%}
     - {{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address']}}:{{hostvars[loop_next]['bb_service_ports']['oioproxy'][0]}},{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
@@ -33,7 +33,7 @@
     module: account
   targets:
     {% for host in groups[prometheus_monitored_group] -%}
-    {%- set loop_next = groups[prometheus_monitored_group][0] if loop.last else loop.nextitem -%}
+    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for port in hostvars[loop_next]['bb_service_ports']['account'] -%}
     - {{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
     {% endfor %}
@@ -43,8 +43,18 @@
     module: oioproxy
   targets:
     {% for host in groups[prometheus_monitored_group] -%}
-    {%- set loop_next = groups[prometheus_monitored_group][0] if loop.last else loop.nextitem -%}
+    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for port in hostvars[loop_next]['bb_service_ports']['oioproxy'] -%}
+    - {{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
+    {% endfor %}
+    {%- endfor %}
+
+- labels:
+    module: rawx
+  targets:
+    {% for host in groups[prometheus_monitored_group] -%}
+    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
+    {% for port in hostvars[loop_next]['bb_service_ports']['rawx'] -%}
     - {{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
     {% endfor %}
     {%- endfor %}

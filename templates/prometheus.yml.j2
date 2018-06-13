@@ -97,18 +97,23 @@ remote_read:
       target_label: __param_target
 
     - source_labels: [module, __address__]
-      regex: ^[account].*;(.*)\=\>(.*)
+      regex: ^account;(.*)\=\>(.*)
       replacement: http://${2}/status
       target_label: __param_target
 
     - source_labels: [module, __address__]
-      regex: ^[oioproxy].*;(.*)\=\>(.*)
+      regex: ^oioproxy;(.*)\=\>(.*)
       replacement: http://${2}/v3.0/status
       target_label: __param_target
 
     - source_labels: [module, __address__]
-      regex: ^[metax].*;(.*)=>(.*),(.*)
+      regex: ^metax;(.*)=>(.*),(.*)
       replacement: http://${2}/v3.0/forward/stats?id=${3}
+      target_label: __param_target
+
+    - source_labels: [module, __address__]
+      regex: ^rawx;(.*)=>(.*)
+      replacement: http://${2}/info
       target_label: __param_target
 
     # Address replacements
@@ -121,7 +126,7 @@ remote_read:
     - source_labels: [__param_target]
       target_label: instance
     - source_labels: [module, __param_target]
-      regex: ^[account|oioproxy].*;.*://(.*)/.*
+      regex: ^[account|oioproxy|rawx].*;.*://(.*)/.*
       replacement: ${1}
       target_label: instance
     - source_labels: [module, __param_target]
