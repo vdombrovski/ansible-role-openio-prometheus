@@ -47,6 +47,16 @@ scrape_configs:
     - source_labels: [module]
       target_label: job
 
+    # Service type strip
+    - source_labels: [module, __address__]
+      regex: ^[tcpcheck];(.*),.*\=\>.*
+      replacement: ${1}
+      target_label: type
+    - source_labels: [module, __address__]
+      regex: ^[tcpcheck];.*,(.*)
+      replacement: ${1}
+      target_label: __address__
+
     # Host strip
     - source_labels: [__address__]
       regex: (.*),.*

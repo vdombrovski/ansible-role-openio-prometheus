@@ -12,7 +12,7 @@
     {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for sc, ports in hostvars[loop_next]['bb_service_ports'].items() -%}
     {% for port in ports -%}
-    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
+    - {{sc}},{{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
     {% endfor %}
     {%- endfor %}
     {%- endfor %}
