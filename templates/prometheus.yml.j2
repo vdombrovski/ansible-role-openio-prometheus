@@ -112,7 +112,7 @@ remote_read:
       target_label: __param_target
 
     - source_labels: [module, __address__]
-      regex: ^[meta0|meta1|meta2].*;(.*)=>(.*),(.*)
+      regex: ^[meta0|meta1|meta2|conscience];(.*)=>(.*),(.*)
       replacement: http://${2}/v3.0/forward/stats?id=${3}
       target_label: __param_target
 
@@ -136,6 +136,10 @@ remote_read:
       target_label: instance
     - source_labels: [module, __param_target]
       regex: ^[meta0|meta1|meta2].*;(.*)?id=(.*)
+      replacement: ${2}
+      target_label: instance
+    - source_labels: [module, __param_target]
+      regex: ^conscience;(.*)?type=(.*)
       replacement: ${2}
       target_label: instance
 {% endif %}
