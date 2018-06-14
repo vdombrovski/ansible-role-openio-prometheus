@@ -31,4 +31,5 @@ prometheus_blackbox_services:
   - redis
   - rdir
   - conscience
+promtool_check_rules_cmd: 'promtool check-rules'
 ...

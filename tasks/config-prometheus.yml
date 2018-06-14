@@ -1,23 +1,5 @@
 ---
-- name: "Set promtool flags based on version"
-  block:
-    - set_fact:
-        promtool_check_config_cmd: 'promtool check-config'
-    - set_fact:
-        promtool_check_rules_cmd: 'promtool check-rules'
-  when: prometheus_version |  version_compare('1.8.1', operator='<=')
-
-- block:
-    - set_fact:
-        promtool_check_config_cmd: 'promtool check config'
-    - set_fact:
-        promtool_check_rules_cmd: 'promtool check rules'
-  when: prometheus_version |  version_compare('1.8.1', operator='>')
-
-- debug:
-    var: promtool_check_config_cmd
-
-- name: "crate additional directories"
+- name: "create additional directories"
   file:
     path: "{{ dirname }}"
     state: directory
@@ -27,6 +9,7 @@
   with_items:
     - "{{ prometheus_file_sd_config_path }}"
     - "{{ prometheus_rules_dir }}"
+    - "{{ prometheus_alert_dir }}"
     - "{{ prometheus_alertmanager_templates_path }}"
   loop_control:
     loop_var: dirname
@@ -46,6 +29,14 @@
     validate: "{{ promtool_check_rules_cmd }} %s"
   with_items:
     - "{{ prometheus_recording_rules }}"
+
+- name: "Setup alerting rules"
+  template:
+    src: alert.rules.j2
+    dest: "{{ prometheus_alert_dir }}/{{ item.name }}.rules"
+    validate: "{{ promtool_check_rules_cmd }} %s"
+  with_items:
+    - "{{ prometheus_alert_rules }}"
 
 - name: "Create sd_files"
   include: sd-create.yml

@@ -1,55 +1,33 @@
 global:
-  scrape_interval:     15s # By default, scrape targets every 15 seconds.
-  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
-  # scrape_timeout is set to the global default (10s).
-
-  # The labels to add to any time series or alerts when communicating with
-  # external systems (federation, remote storage, Alertmanager).
+  scrape_interval:     15s
+  evaluation_interval: 15s
   external_labels:
     monitor: 'master'
 
-{% if prometheus_recording_rules | length > 0 %}
+{% if (prometheus_recording_rules | length + prometheus_alerting_rules | length) > 0 %}
 rule_files:
   {% for rule_file in prometheus_recording_rules %}
   - "{{ prometheus_rules_dir }}/{{ rule_file.name }}.rules"
   {% endfor %}
+  {% for rule_file in prometheus_alert_rules %}
+  - "{{ prometheus_alerts_dir }}/{{ rule_file.name }}.rules"
+  {% endfor %}
 {% endif %}
 
-{% if "alertmanager" in prometheus_components %}
+{# {% if "alertmanager" in prometheus_components %}
 alerting:
   alertmanagers:
   - static_configs:
     - targets:
       - {{ prometheus_alertmanager_opt_listen_ip }}:{{ prometheus_alertmanager_opt_port }}
-{% endif %}
+{% endif %} #}
 
-# A list of scrape configurations.
 scrape_configs:
-# Let prometheus scrape itself by default ...
 - job_name: 'prometheus'
   scrape_interval: 10s
   scrape_timeout:  10s
   static_configs:
     - targets: ['localhost:9090']
-# Assuming node_exporter is running / managed by this role - by default ...
-{% if "node_exporter" in prometheus_components %}
-  static_configs:
-    - targets: ['{{ prometheus_node_exporter_opt_listen_ip }}:{{ prometheus_node_exporter_opt_port }}']
-{% endif %}
-
-{% if "pushgateway" in prometheus_components %}
-- job_name: 'pushgateway'
-scrape_interval: 5s
-# metrics_path defaults to '/metrics'
-# scheme defaults to 'http'.
-  static_configs:
-    - targets: ['{{ prometheus_pushgateway_opt_web_listen_address }}']
-{% endif %}
-{% if prometheus_static_targets is defined %}
-  file_sd_configs:
-    - files:
-      - '{{ prometheus_file_sd_config_path }}/*.yml'
-{% endif %}
 
 {% if prometheus_jobs | length > 0 %}
 {% for job in prometheus_jobs %}
@@ -62,17 +40,6 @@ scrape_interval: 5s
   static_configs:
   - targets: [{{ '"' + job['targets'] | join('","') + '"' }}]
 {% endfor %}
-{% endif %}
-
-{% if "crate_adapter" in prometheus_components %}
-{% if prometheus_cratedb_remote_write %}
-remote_write:
-   - url: http://{{ prometheus_crate_adapter_opt_listen_ip }}:{{ prometheus_crate_adapter_opt_port }}/write
-{% endif %}
-{% if prometheus_cratedb_remote_read %}
-remote_read:
-   - url: http://{{ prometheus_crate_adapter_opt_listen_ip }}:{{ prometheus_crate_adapter_opt_port }}/read
-{% endif %}
 {% endif %}
 
 {% if prometheus_blackbox_enabled %}
