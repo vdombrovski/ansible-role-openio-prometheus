@@ -33,7 +33,7 @@
 - name: "Setup alerting rules"
   template:
     src: alert.rules.j2
-    dest: "{{ prometheus_alert_dir }}/{{ item.name }}.rules"
+    dest: "{{ prometheus_alert_dir }}/default.rules"
     validate: "{{ promtool_check_rules_cmd }} %s"
   with_items:
     - "{{ prometheus_alert_rules }}"
