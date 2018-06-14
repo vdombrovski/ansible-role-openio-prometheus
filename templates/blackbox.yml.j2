@@ -2,7 +2,7 @@
     module: icmpcheck
   targets:
     {% for host in groups[prometheus_monitored_group] -%}
-    - {{ hostvars[groups[prometheus_admin_group][0]]['ansible_'+prometheus_admin_iface]['ipv4']['address'] }}=>{{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}
+    - {{ hostvars[host]['ansible_hostname'] }},{{ hostvars[groups[prometheus_admin_group][0]]['ansible_'+prometheus_admin_iface]['ipv4']['address'] }}=>{{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}
     {% endfor %}
 
 - labels:
@@ -12,7 +12,7 @@
     {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for sc, ports in hostvars[loop_next]['bb_service_ports'].items() -%}
     {% for port in ports -%}
-    - {{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
+    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
     {% endfor %}
     {%- endfor %}
     {%- endfor %}
@@ -25,9 +25,9 @@
     {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
     {%- if service in ['meta0', 'meta1', 'meta2', 'conscience'] -%}
-    - {{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ hostvars[loop_next]['bb_service_ports']['oioproxy'][0] }},{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
+    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ hostvars[loop_next]['bb_service_ports']['oioproxy'][0] }},{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
     {% else -%}
-    - {{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
+    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+prometheus_monitored_iface]['ipv4']['address'] }}:{{ port }}
     {% endif -%}
     {% endfor %}
     {%- endfor %}

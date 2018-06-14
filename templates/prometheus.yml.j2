@@ -47,6 +47,16 @@ scrape_configs:
     - source_labels: [module]
       target_label: job
 
+    # Host strip
+    - source_labels: [__address__]
+      regex: (.*),.*
+      replacement: ${1}
+      target_label: host
+    - source_labels: [__address__]
+      regex: .*,(.*)
+      replacement: ${1}
+      target_label: __address__
+
     # Target replacements
     - source_labels: [module, __address__]
       regex: ^[icmpcheck|tcpcheck|zookeeper|beanstalkd|redis|oioproxy].*;(.*)\=\>(.*)
