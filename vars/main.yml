@@ -32,4 +32,5 @@ prometheus_blackbox_services:
   - rdir
   - conscience
 promtool_check_rules_cmd: "promtool check rules"
+promtool_check_config_cmd: "promtool check config"
 ...

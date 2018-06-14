@@ -35,8 +35,6 @@
     src: alert.rules.j2
     dest: "{{ prometheus_alert_dir }}/default.rules"
     validate: "{{ promtool_check_rules_cmd }} %s"
-  with_items:
-    - "{{ prometheus_alert_rules }}"
 
 - name: "Create sd_files"
   include: sd-create.yml

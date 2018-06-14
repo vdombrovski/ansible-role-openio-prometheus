@@ -4,23 +4,13 @@ global:
   external_labels:
     monitor: 'master'
 
-{% if (prometheus_recording_rules | length + prometheus_alerting_rules | length) > 0 %}
+{% if (prometheus_recording_rules | length + prometheus_alert_rules | length) > 0 %}
 rule_files:
   {% for rule_file in prometheus_recording_rules %}
   - "{{ prometheus_rules_dir }}/{{ rule_file.name }}.rules"
   {% endfor %}
-  {% for rule_file in prometheus_alert_rules %}
-  - "{{ prometheus_alerts_dir }}/{{ rule_file.name }}.rules"
-  {% endfor %}
+  - "{{ prometheus_alert_dir }}/default.rules"
 {% endif %}
-
-{# {% if "alertmanager" in prometheus_components %}
-alerting:
-  alertmanagers:
-  - static_configs:
-    - targets:
-      - {{ prometheus_alertmanager_opt_listen_ip }}:{{ prometheus_alertmanager_opt_port }}
-{% endif %} #}
 
 scrape_configs:
 - job_name: 'prometheus'

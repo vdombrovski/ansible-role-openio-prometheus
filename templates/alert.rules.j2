@@ -1,22 +1,4 @@
-# groups:
-#   - name: {{ item.name }}
-#     {% if 'interval' in item %}interval: {{ item.interval }}
-#     {% endif -%}
-#     rules:
-#     {% for rule in item.rules -%}
-#      - record: {{ rule.record }}
-#     expr: {{ rule.expr }}
-#   {%- endfor %}
-
 groups:
   - name: default
     rules:
-      {{ item | to_nice_yaml }}
-      # {% for rule in item.rules -%}
-      # - alert: {{ rule.alert }}
-      #   expr: {{ rule.expr }}
-      #   labels:
-      #     {{rule.labels | to_nice_yaml}}
-      #   annotations:
-      #
-      # {%- endfor %}
+{{ prometheus_alert_rules | to_nice_yaml | indent(6, true) }}
