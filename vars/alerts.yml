@@ -6,28 +6,28 @@ prometheus_alert_rules:
     labels:
       severity: low
       service: account
-      host: "{{ $labels.host }}"
-      instance: "{{ $labels.instance }}"
+      host: "{% raw %}{{ $labels.host }}{% endraw %}"
+      instance: "{% raw %}{{ $labels.instance }}{% endraw %}"
     annotations:
-      message: "Account << LABEL INSTANCE >> on {{ $labels.host }}: TCP check failed"
+      message: "{% raw %}Account << LABEL INSTANCE >> on {{ $labels.host }}: TCP check failed{% endraw %}"
   - alert: AccountScoreCheck
     for: 30s
-    expr: ""
+    expr: "netdata_openio_score__average == 0"
     labels:
       severity: low
       service: account
-      host: "{{ $labels.host }}"
-      instance: "{{ $labels.instance }}"
+      host: "{% raw %}{{ $labels.host }}{% endraw %}"
+      instance: "{% raw %}{{ $labels.instance }}{% endraw %}"
     annotations:
-      message: "Account << LABEL INSTANCE >> on {{ $labels.host }}: Score is 0"
+      message: "{% raw %}Account << LABEL INSTANCE >> on {{ $labels.host }}: Score is 0{% endraw %}"
   - alert: AccountHealthCheck
     for: 30s
-    expr: ""
+    expr: "probe_success{job='account'} == 0"
     labels:
       severity: low
       service: account
-      host: "{{ $labels.host }}"
-      instance: "{{ $labels.instance }}"
+      host: "{% raw %}{{ $labels.host }}{% endraw %}"
+      instance: "{% raw %}{{ $labels.instance }}{% endraw %}"
     annotations:
-      message: "Account {{ $labels.instance }} on {{ $labels.host }}: Health check failed"
+      message: "{% raw %}Account {{ $labels.instance }} on {{ $labels.host }}: Health check failed{% endraw %}"
 ...
