@@ -57,7 +57,7 @@ groups:
       annotations:
         message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.host }}: Service returned server errors{% endraw %}"
 
-    # Diskspace:
+    # Diskspace alerts
     - alert: Diskspace
       expr: "9 * sum(netdata_openio_byte_avail__average) by (s_instance, instance)  < sum(netdata_openio_byte_used__average) by (s_instance, instance)"
       for: 10s
@@ -68,3 +68,12 @@ groups:
         severity: low
       annotations:
         message: "{% raw %} {{ $labels.s_instance }} on {{ $labels.instance }}: Drive is almost full ( > 90% ) {% endraw %}"
+
+    # Host down alerts
+    - alert: HostDown
+      expr: "probe_success{job='icmpcheck'} == 0"
+      for: 10s
+      labels:
+        severity: low
+      annotations:
+        message: "{% raw %} Host {{ $labels.instance }} is unreachable {% endraw %}"
