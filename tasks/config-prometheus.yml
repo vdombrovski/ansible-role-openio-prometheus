@@ -30,6 +30,9 @@
   with_items:
     - "{{ prometheus_recording_rules }}"
 
+- name: Load Alert rules
+  include_vars: alerts.yml
+
 - name: "Setup alerting rules"
   template:
     src: alert.rules.j2

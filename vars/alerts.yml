@@ -1,0 +1,33 @@
+---
+prometheus_alert_rules:
+  - alert: AccountTCPCheck
+    for: 30s
+    expr: "probe_success{job='tcpcheck', service='account'} == 0"
+    labels:
+      severity: low
+      service: account
+      host: "{{ $labels.host }}"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      message: "Account << LABEL INSTANCE >> on {{ $labels.host }}: TCP check failed"
+  - alert: AccountScoreCheck
+    for: 30s
+    expr: ""
+    labels:
+      severity: low
+      service: account
+      host: "{{ $labels.host }}"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      message: "Account << LABEL INSTANCE >> on {{ $labels.host }}: Score is 0"
+  - alert: AccountHealthCheck
+    for: 30s
+    expr: ""
+    labels:
+      severity: low
+      service: account
+      host: "{{ $labels.host }}"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      message: "Account {{ $labels.instance }} on {{ $labels.host }}: Health check failed"
+...

@@ -96,6 +96,7 @@ prometheus_rules_dir: "{{ prometheus_conf_dir }}/rules"
 #       label1: value1
 #     annotations:
 #       annotation1: Message
+# See vars/alerts.yml
 prometheus_alert_rules: []
 prometheus_alert_dir: "{{ prometheus_conf_dir }}/alerts"
 
