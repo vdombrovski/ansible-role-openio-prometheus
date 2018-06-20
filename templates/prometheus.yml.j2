@@ -34,6 +34,18 @@ scrape_configs:
       regex: openio.score;.*\.(.*?)\_.*
       replacement: ${1}
       target_label: service
+    - source_labels: [chart, dimension]
+      regex: openio.score;.*\.(.*?)\_(.*)
+      replacement: ${2}
+      target_label: s_instance
+    - source_labels: [chart, dimension]
+      regex: openio.byte_avail;.*\.(.*?)\..*
+      replacement: ${1}
+      target_label: s_instance
+    - source_labels: [chart, dimension]
+      regex: openio.rep_hits.*;.*\.(.*)
+      replacement: ${1}
+      target_label: scinstance
 {% endfor %}
 {% endif %}
 
