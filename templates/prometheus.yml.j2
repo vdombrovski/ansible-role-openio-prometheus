@@ -29,6 +29,11 @@ scrape_configs:
   honor_labels: {{ job['honor_labels'] if 'honor_labels' in job else true }}
   static_configs:
   - targets: [{{ '"' + job['targets'] | join('","') + '"' }}]
+  metric_relabel_configs:
+    - source_labels: [chart, dimension]
+      regex: openio.score;.*\.(.*?)\_.*
+      replacement: ${1}
+      target_label: service
 {% endfor %}
 {% endif %}
 
@@ -49,12 +54,12 @@ scrape_configs:
 
     # Service type strip
     - source_labels: [module, __address__]
-      regex: ^[tcpcheck].*;(.*),.*\=\>.*
+      regex: ^[tcpcheck].*;(.*?),.*\=\>.*
       replacement: ${1}
       target_label: service
     - source_labels: [module, __address__]
       regex: ^[tcpcheck].*;(.*?),(.*)
-      replacement: ${1}
+      replacement: ${2}
       target_label: __address__
 
     # Host strip
