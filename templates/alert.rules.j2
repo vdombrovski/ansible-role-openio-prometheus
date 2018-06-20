@@ -6,11 +6,9 @@ groups:
       expr: "probe_success{job='tcpcheck'} == 0"
       labels:
         severity: low
-        service: "{% raw %}{{ $labels.service }}{% endraw %}"
-        host: "{% raw %}{{ $labels.host }}{% endraw %}"
         instance: "{% raw %}{{ $labels.instance }}{% endraw %}"
       annotations:
-        message: "{% raw %}{{ $labels.service}} {{ $labels.dimension }} on {{ $labels.host }}: TCP check failed{% endraw %}"
+        message: "{% raw %}{{ $labels.service}} {{ $labels.instance }} on {{ $labels.host }}: TCP check failed{% endraw %}"
 
     # Score check alert definitions
     - alert: ScoreCheckFailed
@@ -19,10 +17,9 @@ groups:
       labels:
         host: "{% raw %}{{ $labels.instance }}{% endraw %}"
         instance: "{% raw %}{{ $labels.s_instance }}{% endraw %}"
-        service: "{% raw %}{{ $labels.service }}{% endraw %}"
         severity: low
       annotations:
-        message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.host }}: Score is 0{% endraw %}"
+        message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.instance }}: Score is 0{% endraw %}"
 
     # Per service check alert definitions
     {% for service in prometheus_blackbox_services -%}
@@ -30,12 +27,10 @@ groups:
       expr: probe_success{job='{{ service }}'} == 0
       for: 10s
       labels:
-        host: "{% raw %}{{ $labels.instance }}{% endraw %}"
-        instance: "{% raw %}{{ $labels.instance }}{% endraw %}"
         service: "{{ service }}"
         severity: low
       annotations:
-        message: "{% raw %}{{ $labels.service }} {{ $labels.instance }} on {{ $labels.host }}: Health check failed{% endraw %}"
+        message: "{{ service }}{% raw %} {{ $labels.instance }} on {{ $labels.host }}: Health check failed{% endraw %}"
     {% endfor %}
 
     # RAWX: too many 4xx
@@ -48,7 +43,7 @@ groups:
         service: "rawx"
         severity: low
       annotations:
-        message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.host }}: Client error (4xx) ratio too high{% endraw %}"
+        message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.instance }}: Client error (4xx) ratio too high{% endraw %}"
 
     # RAWX: 5xx errors
     - alert: RawxServerErrors
@@ -61,3 +56,15 @@ groups:
         severity: low
       annotations:
         message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.host }}: Service returned server errors{% endraw %}"
+
+    # Diskspace:
+    - alert: Diskspace
+      expr: "9 * sum(netdata_openio_byte_avail__average) by (s_instance, instance)  < sum(netdata_openio_byte_used__average) by (s_instance, instance)"
+      for: 10s
+      labels:
+        host: "{% raw %}{{ $labels.instance }}{% endraw %}"
+        instance: "{% raw %}{{ $labels.s_instance }}{% endraw %}"
+        # service: "rawx"
+        severity: low
+      annotations:
+        message: "{% raw %} {{ $labels.s_instance }} on {{ $labels.instance }}: Drive is almost full ( > 90% ) {% endraw %}"

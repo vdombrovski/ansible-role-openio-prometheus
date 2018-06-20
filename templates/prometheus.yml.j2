@@ -39,13 +39,13 @@ scrape_configs:
       replacement: ${2}
       target_label: s_instance
     - source_labels: [chart, dimension]
-      regex: openio.byte_avail;.*\.(.*?)\..*
+      regex: openio.*[byte_avail|byte_used].*;.*\.(.*?)\..*
       replacement: ${1}
       target_label: s_instance
     - source_labels: [chart, dimension]
       regex: openio.rep_hits.*;.*\.(.*)
       replacement: ${1}
-      target_label: scinstance
+      target_label: s_instance
 {% endfor %}
 {% endif %}
 
