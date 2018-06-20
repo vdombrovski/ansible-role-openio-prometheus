@@ -29,6 +29,7 @@ prometheus_blackbox_services:
   - account
   - beanstalkd
   - redis
+  - redissentinel
   - rdir
   - conscience
 promtool_check_rules_cmd: "promtool check rules"
