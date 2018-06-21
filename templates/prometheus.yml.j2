@@ -125,11 +125,11 @@ scrape_configs:
     - source_labels: [__param_target]
       target_label: instance
     - source_labels: [module, __param_target]
-      regex: ^[account|oioproxy|rawx|rdir].*;.*://(.*?)/.*
-      replacement: ${1}
+      regex: ^[account|oioproxy|rawx|rdir].*;.*://(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*?)/.*
+      replacement: ${1}_${2}_${3}_${4}_${5}
       target_label: instance
     - source_labels: [module, __param_target]
-      regex: ^[meta0|meta1|meta2|conscience].*;(.*)?id=(.*)
-      replacement: ${2}
+      regex: ^[meta0|meta1|meta2|conscience].*;(.*)?id=(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*)
+      replacement: ${2}_${3}_${4}_${5}_${6}
       target_label: instance
 {% endif %}
