@@ -32,6 +32,28 @@ prometheus_blackbox_services:
   - redissentinel
   - rdir
   - conscience
+
+prometheus_blackbox_service_instances:
+  metadata:
+    - meta0
+    - meta1
+    - meta2
+    - oioproxy
+    - zookeeper
+  storage:
+    - rawx
+    - rdir
+    - oioproxy
+  account:
+    - redis
+    - redissentinel
+    - account
+    - oioproxy
+  loadbalancer:
+    - conscience
+  event:
+    - beanstalkd
+
 promtool_check_rules_cmd: "promtool check rules"
 promtool_check_config_cmd: "promtool check config"
 ...
