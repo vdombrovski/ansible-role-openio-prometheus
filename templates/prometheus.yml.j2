@@ -125,7 +125,7 @@ scrape_configs:
     - source_labels: [__param_target]
       target_label: instance
     - source_labels: [module, __param_target]
-      regex: ^[tcpcheck].*;(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*)
+      regex: ^[tcpcheck|zookeeper|redis|redissentinel|beanstalkd].*;(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*)
       replacement: ${1}_${2}_${3}_${4}_${5}
       target_label: instance
     - source_labels: [module, __param_target]
