@@ -99,11 +99,15 @@ prometheus_rules_dir: "{{ prometheus_conf_dir }}/rules"
 # See vars/alerts.yml
 prometheus_alert_rules: []
 prometheus_alert_dir: "{{ prometheus_conf_dir }}/alerts"
-prometheus_alert_sla_default_medium: 60
+prometheus_alert_sla_default_medium: 67
 prometheus_alert_sla_levels_medium: {}
+prometheus_alert_instance_default_medium: 67
+prometheus_alert_instance_levels_medium: {}
 
-prometheus_alert_sla_default_high: 40
+prometheus_alert_sla_default_high: 34
 prometheus_alert_sla_levels_high: {}
+prometheus_alert_instance_default_high: 34
+prometheus_alert_instance_levels_high: {}
 
 prometheus_monitored_group: openio
 prometheus_monitored_iface: eth0

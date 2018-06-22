@@ -1,7 +1,7 @@
 groups:
   - name: default
     rules:
-    - alert: TCPCheckFailed
+    - alert: "TCP check"
       for: 10s
       expr: "probe_success{job='tcpcheck'} == 0"
       labels:
@@ -11,7 +11,7 @@ groups:
         message: "{% raw %}{{ $labels.service}} {{ $labels.instance }} on {{ $labels.host }}: TCP check failed{% endraw %}"
 
     # Score check alert definitions
-    - alert: ScoreCheckFailed
+    - alert: "Score check"
       expr: netdata_openio_score__average == 0
       for: 10s
       labels:
@@ -23,7 +23,7 @@ groups:
 
     # Per service check alert definitions
     {% for service in prometheus_blackbox_services -%}
-    - alert: {{ service }}HealthCheck
+    - alert: "Health check - {{ service }}"
       expr: probe_success{job='{{ service }}'} == 0
       for: 10s
       labels:
@@ -34,7 +34,7 @@ groups:
     {% endfor %}
 
     # RAWX: too many 4xx
-    - alert: RawxClientErrorsRatio
+    - alert: "Client errors on rawx"
       expr: "sum(netdata_openio_rep_hits_4xx__average) by (instance, dimension) / (sum(netdata_openio_rep_hits_2xx__average) by (instance, dimension) + 1) > 0.10"
       for: 10s
       labels:
@@ -46,7 +46,7 @@ groups:
         message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.instance }}: Client error (4xx) ratio too high{% endraw %}"
 
     # RAWX: 5xx errors
-    - alert: RawxServerErrors
+    - alert: "Server errors on rawx"
       expr: "netdata_openio_rep_hits_5xx__average > 0"
       for: 10s
       labels:
@@ -58,7 +58,7 @@ groups:
         message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.host }}: Service returned server errors{% endraw %}"
 
     # Diskspace alerts
-    - alert: Diskspace
+    - alert: "Diskspace low"
       expr: "9 * sum(netdata_openio_byte_avail__average) by (s_instance, instance)  < sum(netdata_openio_byte_used__average) by (s_instance, instance)"
       for: 10s
       labels:
@@ -78,10 +78,10 @@ groups:
       annotations:
         message: "{% raw %} Host {{ $labels.instance }} is unreachable {% endraw %}"
 
-    # Instance SLA - Warning
+    # Instance count - Warning
     {% for service in prometheus_blackbox_services -%}
-    - alert: {{ service }}SLAWarning
-      expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service='{{ service }}'})) / count(probe_success{job='tcpcheck',service='{{ service }}'})) < {{ prometheus_alert_sla_levels_medium[service] if service in prometheus_alert_sla_levels_medium else prometheus_alert_sla_default_medium }}"
+    - alert: "Number of instances low - {{service}}"
+      expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service='{{ service }}'})) / count(probe_success{job='tcpcheck',service='{{ service }}'})) < {{ prometheus_alert_instance_levels_medium[service] if service in prometheus_alert_instance_levels_medium else prometheus_alert_instance_default_medium }}"
       for: 10s
       labels:
         service: "{{ service }}"
@@ -90,10 +90,10 @@ groups:
         message: "{{ service }} SLA is below acceptable level; restore some {{ service }} instances to a functional level"
     {% endfor %}
 
-    # Instance SLA - Critical
+    # Instance count - Critical
     {% for service in prometheus_blackbox_services -%}
-    - alert: {{ service }}SLACritical
-      expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service='{{ service }}'})) / count(probe_success{job='tcpcheck',service='{{ service }}'})) < {{ prometheus_alert_sla_levels_high[service] if service in prometheus_alert_sla_levels_high else prometheus_alert_sla_default_high }}"
+    - alert: "Number of instances critical - {{service}}"
+      expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service='{{ service }}'})) / count(probe_success{job='tcpcheck',service='{{ service }}'})) < {{ prometheus_alert_instance_levels_high[service] if service in prometheus_alert_instance_levels_high else prometheus_alert_instance_default_high }}"
       for: 10s
       labels:
         service: "{{ service }}"
@@ -128,7 +128,7 @@ groups:
 
     # Service SLA - Warning
     {% for service, instances in prometheus_blackbox_service_instances.items() -%}
-    - alert: {{service}}SLAWarning
+    - alert: "SLA warning - {{service}} service"
       expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service=~'{{ instances | join('|') }}'})) / count(probe_success{job='tcpcheck',service=~'{{ instances | join('|') }}'})) < {{ prometheus_alert_sla_levels_medium[service] if service in prometheus_alert_sla_levels_medium else prometheus_alert_sla_default_medium }}"
       for: 10s
       labels:
@@ -140,7 +140,7 @@ groups:
 
     # Service SLA - Critical
     {% for service, instances in prometheus_blackbox_service_instances.items() -%}
-    - alert: {{service}}SLACritical
+    - alert: "SLA critical - {{service}} service"
       expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service=~'{{ instances | join('|') }}'})) / count(probe_success{job='tcpcheck',service=~'{{ instances | join('|') }}'})) < {{ prometheus_alert_sla_levels_high[service] if service in prometheus_alert_sla_levels_high else prometheus_alert_sla_default_high }}"
       for: 10s
       labels:
