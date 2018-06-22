@@ -34,6 +34,8 @@ prometheus_components:
 prometheus_user: prometheus
 prometheus_group: prometheus
 
+prometheus_install: true
+
 prometheus_defaults_file: /etc/default/alertmanager
 prometheus_conf_dir: /etc/prometheus
 prometheus_file_sd_config_path: /etc/prometheus/targets
@@ -115,6 +117,7 @@ prometheus_admin_group: admin
 prometheus_admin_iface: eth0
 
 prometheus_blackbox_enabled: true
+prometheus_blackbox_update: true
 prometheus_blackbox_scrape: 10s
 prometheus_blackbox_port: 9115
 prometheus_blackbox_zk_port_regex: "^(60)[0-9]+$"

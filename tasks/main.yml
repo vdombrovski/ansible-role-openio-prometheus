@@ -1,16 +1,4 @@
 ---
-# tasks file for ansible-role-prometheus
-
-- block:
-    - name: "Perform service autodiscovery"
-      include: "autodiscovery.yml"
-
-    - name: "Show result"
-      debug:
-        msg: hostvars[{{item}}]['bb_service_ports']
-      with_items: "{{groups[prometheus_monitored_group]}}"
-  when: prometheus_monitored_group in group_names
-
 - block:
     - name: "Include {{ ansible_os_family }} vars"
       include_vars: "{{ ansible_os_family }}.yml"
@@ -28,21 +16,6 @@
       when: prometheus_installation_method == 'github-release' or ansible_virtualization_type == 'docker'
 
     # CONFIGURATION - BLACKBOX
-
-    - name: "Create blackbox targets directory"
-      file:
-        path: "{{ prometheus_conf_dir }}/targets/blackbox"
-        state: directory
-        owner: "{{ prometheus_user }}"
-        group: "{{ prometheus_group }}"
-        mode: 0755
-      when: "{{ prometheus_blackbox_enabled }}"
-
-    - name: "Generate blackbox targets"
-      template:
-        src: blackbox.yml.j2
-        dest: "{{ prometheus_conf_dir }}/targets/blackbox/openio.yml"
-      when: "{{ prometheus_blackbox_enabled }}"
 
     - name: "Configure prometheus components"
       include: "config-{{ item }}.yml"
@@ -75,8 +48,6 @@
       when:
         - ansible_virtualization_type == 'docker'
 
-    # START
-
     - name: "Start/restart prometheus (Docker)"
       shell: "(pkill prometheus || true) && prometheus --config.file={{prometheus_opt_config_file}} > \
               {{prometheus_log_path}}/prometheus.log 2>&1 &"
@@ -89,11 +60,20 @@
         port: "{{ prometheus_opt_port }}"
         delay: 10
       when: "'prometheus' in prometheus_components"
-  when: prometheus_admin_group in group_names
-  # - name: "wait until alertmanager service is up - tcp"
-  #   wait_for:
-  #     host: "{{ prometheus_alertmanager_opt_listen_ip }}"
-  #     port: "{{ prometheus_alertmanager_opt_port }}"
-  #     delay: 10
-  #   when: "'alertmanager' in prometheus_components"
+  when: prometheus_admin_group in group_names and prometheus_install
+
+
+- block:
+    - name: "Include blackbox tasks"
+      include: "blackbox.yml"
+
+    - name: "Reload prometheus"
+      systemd:
+        state: reloaded
+        daemon_reload: true
+        enabled: true
+        name: prometheus
+      when:
+        - ansible_virtualization_type != 'docker'
+  when: prometheus_blackbox_enabled and prometheus_blackbox_update
 ...
