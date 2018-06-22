@@ -81,7 +81,7 @@ groups:
     # Service SLA - Warning
     {% for service in prometheus_blackbox_services -%}
     - alert: {{ service }}SLAWarning
-      expr: "100 * count(count(ALERTS{alertstate='firing',service='{{ service }}'}) by (instance, service)) by (service) / count(probe_success{job='tcpcheck', service='{{ service }}'}) < {{ prometheus_alert_sla_levels_medium[service] if service in prometheus_alert_sla_levels_medium else prometheus_alert_sla_default_medium }}"
+      expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service='{{ service }}'})) / count(probe_success{job='tcpcheck',service='{{ service }}'})) < {{ prometheus_alert_sla_levels_medium[service] if service in prometheus_alert_sla_levels_medium else prometheus_alert_sla_default_medium }}"
       for: 10s
       labels:
         service: "{{ service }}"
@@ -93,7 +93,7 @@ groups:
     # Service SLA - Critical
     {% for service in prometheus_blackbox_services -%}
     - alert: {{ service }}SLACritical
-      expr: "100 * count(count(ALERTS{alertstate='firing',service='{{ service }}'}) by (instance, service)) by (service) / count(probe_success{job='tcpcheck', service='{{ service }}'}) < {{ prometheus_alert_sla_levels_high[service] if service in prometheus_alert_sla_levels_high else prometheus_alert_sla_default_high }}"
+      expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service='{{ service }}'})) / count(probe_success{job='tcpcheck',service='{{ service }}'})) < {{ prometheus_alert_sla_levels_high[service] if service in prometheus_alert_sla_levels_high else prometheus_alert_sla_default_high }}"
       for: 10s
       labels:
         service: "{{ service }}"
