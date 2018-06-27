@@ -62,7 +62,6 @@
       when: "'prometheus' in prometheus_components"
   when: prometheus_admin_group in group_names and prometheus_install
 
-
 - block:
     - name: "Include blackbox tasks"
       include: "blackbox.yml"

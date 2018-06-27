@@ -90,16 +90,10 @@ prometheus_jobs: []
 prometheus_recording_rules: []
 prometheus_rules_dir: "{{ prometheus_conf_dir }}/rules"
 
-# prometheus_alerting_rules format:
-#   - name: alert_rule1
-#     for: 10s
-#     expr: job:request_latency_seconds:mean5m{job="myjob"} > 0.5
-#     labels:
-#       label1: value1
-#     annotations:
-#       annotation1: Message
-# See vars/alerts.yml
-prometheus_alert_rules: []
+prometheus_alertmanager_enabled: true
+prometheus_alertmanager_host: 127.0.0.1
+prometheus_alertmanager_port: 9093
+
 prometheus_alert_dir: "{{ prometheus_conf_dir }}/alerts"
 prometheus_alert_sla_default_medium: 67
 prometheus_alert_sla_levels_medium: {}

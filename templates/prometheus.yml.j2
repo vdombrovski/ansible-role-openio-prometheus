@@ -4,7 +4,7 @@ global:
   external_labels:
     monitor: 'master'
 
-{% if (prometheus_recording_rules | length + prometheus_alert_rules | length) > 0 %}
+{% if prometheus_recording_rules | length > 0 %}
 rule_files:
   {% for rule_file in prometheus_recording_rules %}
   - "{{ prometheus_rules_dir }}/{{ rule_file.name }}.rules"
@@ -136,4 +136,13 @@ scrape_configs:
       regex: ^[meta0|meta1|meta2|conscience].*;(.*)?id=(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*)
       replacement: ${2}_${3}_${4}_${5}_${6}
       target_label: instance
+{% endif %}
+
+
+{% if prometheus_alertmanager_enabled %}
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - {{ prometheus_alertmanager_host }}:{{ prometheus_alertmanager_port }}
 {% endif %}
