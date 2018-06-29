@@ -1,3 +1,21 @@
 ---
-# vars file for ansible-role-prometheus
+prometheus_recording_rules:
+  - name: netdata_aggregation
+    interval: 10s
+    rules:
+      - record: "aggr:netdata_openio_score:avg_per_service"
+        expr: "avg(label_replace(netdata_openio_score__average, \"dim2\", \"$1\", \"dimension\", \"(.*?)[_].*\")) \
+by (dim2)"
+      - record: "aggr:netdata_web_log_bandwidth:sum"
+        expr: "sum(label_replace(netdata_web_log_bandwidth_kilobits_persec_average, \
+\"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
+      - record: "aggr:netdata_web_log_response_codes:sum"
+        expr: "sum(label_replace(netdata_web_log_response_codes_requests_persec_average, \
+\"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
+      - record: "aggr:netdata_web_log_http_request_methods:sum"
+        expr: "sum(label_replace(netdata_web_log_http_method_requests_persec_average, \
+\"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
+      - record: "aggr:netdata_web_log_response_time_ms:sum"
+        expr: "sum(label_replace(netdata_web_log_response_time_milliseconds_average, \
+\"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
 ...

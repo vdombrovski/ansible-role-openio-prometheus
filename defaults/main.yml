@@ -108,7 +108,6 @@ prometheus_jobs: []
 #     rules:
 #       - record: "job:metric:operation"
 #         expr: "PROMQL_QUERY"
-prometheus_recording_rules: []
 
 ################################################################################
 # custom opts for config file
