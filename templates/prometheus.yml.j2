@@ -19,16 +19,15 @@ scrape_configs:
   static_configs:
     - targets: ['localhost:9090']
 
-{% if prometheus_jobs | length > 0 %}
-{% for job in prometheus_jobs %}
-- job_name: {{ job['name'] }}
-  scrape_interval: {{ job['scrape_interval'] if 'scrape_interval' in job else '10s' }}
-  metrics_path: '{{ job["metrics_path"] }}'
+{% if prometheus_netdata_enabled %}
+- job_name: netdata
+  scrape_interval: {{ prometheus_netdata_interval }}
+  metrics_path: "/api/v1/allmetrics"
   params:
-    format: [{{ job['format'] if 'format' in job else 'prometheus_all_hosts' }}]
-  honor_labels: {{ job['honor_labels'] if 'honor_labels' in job else true }}
-  static_configs:
-  - targets: [{{ '"' + job['targets'] | join('","') + '"' }}]
+    format: 'prometheus_all_hosts'
+  honor_labels: true
+  file_sd_configs:
+    files: "{{ prometheus_targets_dir }}/netdata.yml"
   metric_relabel_configs:
     - source_labels: [chart, dimension]
       regex: openio.score;.*\.(.*?)\_.*
@@ -46,16 +45,15 @@ scrape_configs:
       regex: openio.rep_hits.*;.*\.(.*)
       replacement: ${1}
       target_label: s_instance
-{% endfor %}
 {% endif %}
 
 {% if prometheus_blackbox_enabled %}
 - job_name: 'blackbox'
-  scrape_interval: {{prometheus_blackbox_scrape}}
+  scrape_interval: {{ prometheus_blackbox_interval }}
   metrics_path: /probe
   file_sd_configs:
     - files:
-        - '{{prometheus_conf_dir}}/targets/blackbox/*.yml'
+        - '{{ prometheus_targets_dir }}/blackbox.yml'
   relabel_configs:
     # Module replacements
     - source_labels: [module]
@@ -137,7 +135,6 @@ scrape_configs:
       replacement: ${2}_${3}_${4}_${5}_${6}
       target_label: instance
 {% endif %}
-
 
 {% if prometheus_alertmanager_enabled %}
 alerting:

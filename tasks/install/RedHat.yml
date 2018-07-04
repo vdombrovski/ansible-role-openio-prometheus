@@ -1,0 +1,14 @@
+---
+- name: Add repository
+  yum_repository:
+    name: prometheus
+    description: Prometheus repo
+    baseurl: https://packagecloud.io/prometheus-rpm/release/el/7/$basearch
+    gpgkey: https://packagecloud.io/prometheus-rpm/release/gpgkey
+    gpgcheck: true
+
+- name: Install
+  yum:
+    name: "prometheus2-{{ prometheus_version }}"
+    state: present
+...

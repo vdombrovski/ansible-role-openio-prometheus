@@ -1,0 +1,10 @@
+---
+- name: Add repository
+  apt_repository:
+    repo: deb https://packagecloud.io/prometheus-rpm/release/ubuntu/ xenial main
+    state: present
+
+- name: Install
+  apt:
+    name: "prometheus={{ prometheus_version }}"
+...

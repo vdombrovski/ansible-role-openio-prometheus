@@ -19,6 +19,12 @@ by (dim2)"
         expr: "sum(label_replace(netdata_web_log_response_time_milliseconds_average, \
 \"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
 
+prometheus_valid_distros:
+  - distro: Ubuntu
+    version: 16
+  - distro: CentOS
+    version: 7
+
 prometheus_blackbox_services:
   - meta0
   - meta1

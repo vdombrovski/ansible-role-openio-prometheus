@@ -1,78 +1,33 @@
 ---
 - block:
-    - name: "Include {{ ansible_os_family }} vars"
-      include_vars: "{{ ansible_os_family }}.yml"
+    - name: Perform checks
+      include: preflight.yml
 
-    - name: "Include {{ ansible_os_family }} tasks"
-      include: "install/{{ ansible_os_family }}-{{ prometheus_installation_method }}.yml"
-      when: prometheus_installation_method == 'pkg'
+    - name: Prometheus > install
+      include: "install/{{ ansible_distribution }}.yml"
 
-    - name: "include docker specific vars"
-      include_vars: docker.yml
-      when: ansible_virtualization_type == 'docker'
-
-    - name: "Include {{ prometheus_installation_method }} tasks"
-      include: "install/{{ prometheus_installation_method }}.yml"
-      when: prometheus_installation_method == 'github-release' or ansible_virtualization_type == 'docker'
-
-    # CONFIGURATION - BLACKBOX
-
-    - name: "Configure prometheus components"
-      include: "config-{{ item }}.yml"
-      when:
-        - not prometheus_skip_config
-        - ansible_virtualization_type != 'docker'
-      with_items:
-        - "{{ prometheus_components }}"
+    - name: Prometheus > configure
+      include: "configure.yml"
+      notify: reload prometheus
 
     # CONFIGURATION - PROMETHEUS
 
-    - name: "Enable / Start prometheus components"
+    - name: "Ensure prometheus is started/enabled"
       systemd:
-        state: restarted
+        state: started
         daemon_reload: true
         enabled: true
-        name: "{{ item }}"
-      with_items:
-        - "{{ prometheus_components }}"
-      when:
-        - ansible_virtualization_type != 'docker'
+        name: "prometheus"
 
-    - name: Initialize prometheus log directory (Docker)
-      file:
-        path: "{{prometheus_log_path}}"
-        owner: root
-        group: root
-        mode: 0755
-        state: directory
-      when:
-        - ansible_virtualization_type == 'docker'
-
-    - name: "Start/restart prometheus (Docker)"
-      shell: "(pkill prometheus || true) && prometheus --config.file={{prometheus_opt_config_file}} > \
-              {{prometheus_log_path}}/prometheus.log 2>&1 &"
-      when:
-        - ansible_virtualization_type == 'docker'
-
-    - name: "wait until prometheus service is up - tcp"
+    - name: "Wait until service is up"
       wait_for:
-        host: "{{ prometheus_opt_listen_ip }}"
-        port: "{{ prometheus_opt_port }}"
+        host: "{{ prometheus_listen_ip }}"
+        port: "{{ prometheus_listen_port }}"
         delay: 10
-      when: "'prometheus' in prometheus_components"
-  when: prometheus_admin_group in group_names and prometheus_install
+  when: prometheus_admin_group in group_names
 
-- block:
-    - name: "Include blackbox tasks"
-      include: "blackbox.yml"
-
-    - name: "Reload prometheus"
-      systemd:
-        state: reloaded
-        daemon_reload: true
-        enabled: true
-        name: prometheus
-      when:
-        - ansible_virtualization_type != 'docker'
-  when: prometheus_blackbox_enabled and prometheus_blackbox_update
+- name: Blackbox > configure
+  include: "blackbox.yml"
+  notify: reload prometheus
+  when: prometheus_blackbox_enabled and prometheus_blackbox_group in group_names
 ...

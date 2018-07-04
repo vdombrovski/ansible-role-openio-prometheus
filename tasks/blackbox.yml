@@ -1,26 +1,11 @@
 ---
-- block:
-    - name: "Perform service autodiscovery"
-      include: "autodiscovery.yml"
+- name: "Perform service autodiscovery"
+  include: "autodiscovery.yml"
+  when: prometheus_blackbox_group in group_names
 
-    - name: "Show result"
-      debug:
-        msg: hostvars[{{item}}]['bb_service_ports']
-      with_items: "{{groups[prometheus_monitored_group]}}"
-  when: prometheus_monitored_group in group_names
-
-- block:
-    - name: "Create blackbox targets directory"
-      file:
-        path: "{{ prometheus_conf_dir }}/targets/blackbox"
-        state: directory
-        owner: "{{ prometheus_user }}"
-        group: "{{ prometheus_group }}"
-        mode: 0755
-
-    - name: "Generate blackbox targets"
-      template:
-        src: blackbox.yml.j2
-        dest: "{{ prometheus_conf_dir }}/targets/blackbox/openio.yml"
+- name: "Generate blackbox targets"
+  template:
+    src: blackbox.yml.j2
+    dest: "{{ prometheus_conf_dir }}/targets/blackbox.yml"
   when: prometheus_admin_group in group_names
 ...

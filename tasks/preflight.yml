@@ -1,0 +1,20 @@
+---
+- name: Preflight > init checks
+  set_fact:
+    prometheus_checks:
+      - distro: false
+
+- name: Preflight > check distro
+  set_fact:
+    prometheus_checks: "{{ prometheus_checks | combine({distro: true}) }}"
+  when:
+    - ansible_distribution == item.distro
+    - ansible_distribution_major_version == item.version
+  with_items: "{{prometheus_valid_distros}}"
+
+# Keep this part at the end
+- name: Fail on failed checks
+  fail:
+    msg: "Check failed: {{ item.key }}"
+  with_dict: "{{ prometheus_checks }}"
+...
