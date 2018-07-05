@@ -26,8 +26,27 @@
         delay: 10
   when: prometheus_admin_group in group_names
 
-- name: Blackbox > configure
-  include: "blackbox.yml"
+- block:
+    - name: "Blackbox > Perform service autodiscovery"
+      include: "autodiscovery.yml"
+      when: prometheus_blackbox_group in group_names
+
+    - name: "Blackbox > Generate blackbox targets"
+      template:
+        src: blackbox.yml.j2
+        dest: "{{ prometheus_conf_dir }}/targets/blackbox.yml"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_group }}"
+      when: prometheus_admin_group in group_names
+      notify: reload prometheus
+  when: prometheus_blackbox_enabled and bb_service_ports is defined
+
+- name: "Netdata > configure"
+  template:
+    src: netdata.yml.j2
+    dest: "{{ prometheus_conf_dir }}/targets/netdata.yml"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+  when: prometheus_netdata_enabled
   notify: reload prometheus
-  when: prometheus_blackbox_enabled and prometheus_blackbox_group in group_names
 ...

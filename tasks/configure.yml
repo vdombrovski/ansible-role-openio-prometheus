@@ -7,32 +7,24 @@
     group: "{{ prometheus_group }}"
     mode: 0755
   with_items:
-    - "{{ prometheus_rules_dir }}"
-    - "{{ prometheus_alert_dir }}"
-    - "{{ prometheus_targets_dir }}"
+    - "{{ prometheus_conf_dir }}/alerts"
+    - "{{ prometheus_conf_dir }}/rules"
+    - "{{ prometheus_conf_dir }}/targets"
   loop_control:
     loop_var: dirname
-
-# - name: "Set prometheus service"
-#   template:
-#     src: prometheus.service.j2
-#     dest: "{{ prometheus_systemd_dir }}/prometheus.service"
-#   notify:
-#     - reload prometheus
-#   when: ansible_virtualization_type != 'docker'
 
 - name: "Setup recording rules"
   template:
     src: record.rules.j2
-    dest: "{{ prometheus_rules_dir }}/{{ item.name }}.rules"
+    dest: "{{ prometheus_conf_dir }}/rules/{{ item.name }}.rules"
     validate: "{{ promtool_check_rules_cmd }} %s"
   with_items:
-    - "{{ prometheus_recording_rules }}"
+    - "{{ prometheus_aggregation_rules }}"
 
 - name: "Setup alerting rules"
   template:
     src: alert.rules.j2
-    dest: "{{ prometheus_alert_dir }}/default.rules"
+    dest: "{{ prometheus_conf_dir }}/alerts/default.rules"
     validate: "{{ promtool_check_rules_cmd }} %s"
 
 - name: "Setup prometheus config yml"

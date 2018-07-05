@@ -4,16 +4,16 @@ global:
   external_labels:
     monitor: 'master'
 
-{% if prometheus_recording_rules | length > 0 %}
+{% if prometheus_aggregation_rules | length > 0 %}
 rule_files:
-  {% for rule_file in prometheus_recording_rules %}
-  - "{{ prometheus_rules_dir }}/{{ rule_file.name }}.rules"
+  {% for rule_file in prometheus_aggregation_rules %}
+  - "{{ prometheus_conf_dir }}/rules/{{ rule_file.name }}.rules"
   {% endfor %}
-  - "{{ prometheus_alert_dir }}/default.rules"
+  - "{{ prometheus_conf_dir }}/alerts/default.rules"
 {% endif %}
 
 scrape_configs:
-- job_name: "prometheus"
+- job_name: prometheus
   scrape_interval: 10s
   scrape_timeout:  10s
   static_configs:
@@ -28,7 +28,7 @@ scrape_configs:
   honor_labels: true
   file_sd_configs:
     - files:
-      - "{{ prometheus_targets_dir }}/netdata.yml"
+      - "{{ prometheus_conf_dir }}/targets/netdata.yml"
   static_configs:
     - targets: []
   metric_relabel_configs:
@@ -51,12 +51,12 @@ scrape_configs:
 {% endif %}
 
 {% if prometheus_blackbox_enabled -%}
-- job_name: "blackbox"
+- job_name: blackbox
   scrape_interval: {{ prometheus_blackbox_interval }}
   metrics_path: /probe
   file_sd_configs:
     - files:
-        - '{{ prometheus_targets_dir }}/blackbox.yml'
+        - '{{ prometheus_conf_dir }}/targets/blackbox.yml'
   relabel_configs:
     # Module replacements
     - source_labels: [module]

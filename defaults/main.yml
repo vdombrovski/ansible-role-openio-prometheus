@@ -1,11 +1,7 @@
 ---
 # Global
-prometheus_monitored_group: openio
 prometheus_blackbox_group: blackbox
 prometheus_admin_group: admin
-
-prometheus_monitored_iface: eth0
-prometheus_admin_iface: eth0
 
 prometheus_listen_ip: 0.0.0.0
 prometheus_listen_port: 9090
@@ -18,12 +14,6 @@ prometheus_version: 2.2.1
 # Directories
 prometheus_storage_path: /var/lib/prometheus/data
 prometheus_conf_dir: /etc/prometheus
-prometheus_log_dir: /var/log/prometheus
-prometheus_install_dir: /opt/prometheus
-prometheus_user_homedir: /var/lib/prometheus
-prometheus_rules_dir: "{{ prometheus_conf_dir }}/rules"
-prometheus_alert_dir: "{{ prometheus_conf_dir }}/alerts"
-prometheus_targets_dir: "{{ prometheus_conf_dir }}/targets"
 
 # Collection: netdata
 prometheus_netdata_enabled: true
@@ -35,7 +25,8 @@ prometheus_blackbox_enabled: true
 prometheus_blackbox_interval: 10s
 prometheus_blackbox_zk_port_regex: "^(60)[0-9]+$"
 prometheus_blackbox_port: 9115
-prometheus_blackbox_targets: []
+prometheus_blackbox_iface: eth0
+prometheus_blackbox_admin_iface: eth0
 
 # Metric aggregation
 # prometheus_recording_rules format:
@@ -44,7 +35,7 @@ prometheus_blackbox_targets: []
 #     rules:
 #       - record: "job:metric:operation"
 #         expr: "PROMQL_QUERY"
-prometheus_recording_rules: []
+prometheus_aggregation_rules: []
 
 # Alert generation
 prometheus_alert_sla_default_medium: 67
