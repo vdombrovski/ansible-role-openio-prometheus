@@ -1,9 +1,9 @@
 ![picture alt](https://cdn.rawgit.com/fabric8io/fabric8-devops/93ca9bc/prometheus/src/main/fabric8/icon.png "Prometheus")
-# Ansible Role Prometheus [![Build Status](https://travis-ci.org/open-io/ansible-role-prometheus.svg?branch=master)](https://travis-ci.org/vdombrovski/ansible-role-prometheus)
+# Ansible Role Prometheus [![Build Status](https://travis-ci.org/open-io/ansible-role-openio-prometheus.svg?branch=master)](https://travis-ci.org/open-io/ansible-role-openio-prometheus)
 
 ### Description
 
-This role deploys Prometheus. Below are the currently supported features:
+This role deploys a Prometheus setup, specifically tuned for the monitoring of OpenIO clusters. Below are the currently supported features:
 - Netdata metric collection
 - Blackbox health check collection
 - Metric aggregation
@@ -85,10 +85,10 @@ ansible_connection=local
 ### Example playbook
 ```yaml
 ---
-- hosts: localhost
+- hosts: all
   become: true
   roles:
-    - role: ansible-role-prometheus
+    - role: ansible-role-openio-prometheus
 ...
 ```
 
@@ -99,4 +99,4 @@ ansible_connection=local
 ## Author Information
 
 - Vladimir DOMBROVSKI <vladimir@openio.io> (Maintainer)
-- [Haggai Philip Zagury](http://www.tikalk.com/devops/haggai)
+- Original contribution by [Haggai Philip Zagury](http://www.tikalk.com/devops/haggai)
