@@ -1,9 +1,0 @@
-groups:
-  - name: {{ item.name }}
-    {% if 'interval' in item %}interval: {{ item.interval }}
-    {% endif -%}
-    rules:
-    {% for rule in item.rules -%}
-    - record: {{ rule.record }}
-      expr: {{ rule.expr }}
-    {% endfor %}

@@ -1,0 +1,7 @@
+# Test playbook
+---
+- hosts: localhost
+  become: true
+  roles:
+    - role: ansible-role-prometheus
+...
