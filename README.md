@@ -1,6 +1,14 @@
 ![picture alt](https://cdn.rawgit.com/fabric8io/fabric8-devops/93ca9bc/prometheus/src/main/fabric8/icon.png "Prometheus")
-# Ansible Role Prometheus [![Build Status](https://travis-ci.org/vdombrovski/ansible-role-prometheus.svg?branch=alertmanager)](https://travis-ci.org/vdombrovski/ansible-role-prometheus)
+# Ansible Role Prometheus [![Build Status](https://travis-ci.org/open-io/ansible-role-prometheus.svg?branch=master)](https://travis-ci.org/vdombrovski/ansible-role-prometheus)
 
+### Description
+
+This role deploys Prometheus. Below are the currently supported features:
+- Netdata metric collection
+- Blackbox health check collection
+- Metric aggregation
+- Alert generation
+- (WIP) alert forwarding
 
 ### Variables
 
@@ -95,5 +103,5 @@ ansible_connection=local
 
 ## Author Information
 
-Vladimir DOMBROVSKI <vladimir@openio.io> (Maintainer)
-[Haggai Philip Zagury](http://www.tikalk.com/devops/haggai)
+- Vladimir DOMBROVSKI <vladimir@openio.io> (Maintainer)
+- [Haggai Philip Zagury](http://www.tikalk.com/devops/haggai)
