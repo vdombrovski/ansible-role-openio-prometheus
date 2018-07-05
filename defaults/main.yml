@@ -28,15 +28,6 @@ prometheus_blackbox_port: 9115
 prometheus_blackbox_iface: eth0
 prometheus_blackbox_admin_iface: eth0
 
-# Metric aggregation
-# prometheus_recording_rules format:
-#   - name: recording_rule1
-#     interval: 10s
-#     rules:
-#       - record: "job:metric:operation"
-#         expr: "PROMQL_QUERY"
-prometheus_aggregation_rules: []
-
 # Alert generation
 prometheus_alert_sla_default_medium: 67
 prometheus_alert_sla_levels_medium: {}

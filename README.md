@@ -53,11 +53,6 @@ This role deploys Prometheus. Below are the currently supported features:
 | prometheus_blackbox_port          | Port to deploy blackbox exporter on              | integer |
 | prometheus_blackbox_interval      | Interval at which health checks are scraped      | string  |
 
-#### Metric aggregation
-| Variable                     | Description                     | Type |
-| ---------------------------- | ------------------------------- | ---- |
-| prometheus_aggregation_rules | Metric aggregation definitions* | list |
-
 #### Alert generation
 | Variable                                 | Description                                                                                | Type    |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------ | ------- |
