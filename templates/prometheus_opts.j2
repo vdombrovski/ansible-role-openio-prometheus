@@ -1,0 +1,1 @@
+PROMETHEUS_OPTS='{% for key, value in prometheus_run_opts.items() -%}--{{key}}{{ '=' if value else '' }}{{ value if value else '' }} {% endfor %}'

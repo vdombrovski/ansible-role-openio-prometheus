@@ -1,0 +1,22 @@
+---
+- name: Install requirements
+  apt:
+    name: apt-transport-https
+    state: present
+
+- name: Add repository
+  apt_repository:
+    repo: deb https://packagecloud.io/prometheus-deb/release/ubuntu/ xenial main
+    state: present
+
+- name: Add Key
+  apt_key:
+    url: https://packagecloud.io/prometheus-deb/release/gpgkey
+    state: present
+
+- name: Install
+  apt:
+    # TODO: improve version handling
+    name: "prometheus={{ prometheus_version }}-1"
+    allow_unauthenticated: true
+...

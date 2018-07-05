@@ -38,8 +38,26 @@
 - name: "Setup prometheus config yml"
   template:
     src: prometheus.yml.j2
-    dest: "{{ prometheus_opt_config_file }}"
+    dest: "{{ prometheus_conf_dir }}/prometheus.yml"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     validate: "{{ promtool_check_config_cmd }} %s"
+
+- name: "Create prometheus run options"
+  set_fact:
+    prometheus_run_opts:
+      config.file: "{{ prometheus_conf_dir}}/prometheus.yml"
+      storage.tsdb.path: "{{ prometheus_storage_path }}"
+      storage.tsdb.retention: "{{ prometheus_storage_retention }}"
+      web.enable-lifecycle: ""
+      web.listen-address: "{{ prometheus_listen_ip }}:{{ prometheus_listen_port }}"
+      web.external-url: "http://{{ prometheus_listen_ip }}:{{ prometheus_listen_port }}"
+      log.level: "{{ prometheus_loglevel }}"
+
+- name: Save Prometheus run options
+  template:
+    src: prometheus_opts.j2
+    dest: "/etc/default/prometheus"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
 ...

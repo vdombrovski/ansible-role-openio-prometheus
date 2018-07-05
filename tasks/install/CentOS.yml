@@ -5,10 +5,11 @@
     description: Prometheus repo
     baseurl: https://packagecloud.io/prometheus-rpm/release/el/7/$basearch
     gpgkey: https://packagecloud.io/prometheus-rpm/release/gpgkey
-    gpgcheck: true
+    gpgcheck: 0
 
 - name: Install
   yum:
     name: "prometheus2-{{ prometheus_version }}"
     state: present
+    disable_gpg_check: true
 ...
