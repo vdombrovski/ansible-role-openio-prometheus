@@ -41,5 +41,5 @@
   set_fact:
     bb_service_ports: "{{bb_service_ports | combine({'zookeeper': bb_service_ports['zookeeper'] |\
      select('match', prometheus_blackbox_zk_port_regex) | list})}}"
-  when: "{{ 'zookeeper' in bb_service_ports }}"
+  when: 'zookeeper' in bb_service_ports
 ...
