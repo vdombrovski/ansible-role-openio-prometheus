@@ -37,7 +37,7 @@
         dest: "{{ prometheus_conf_dir }}/targets/blackbox.yml"
         owner: "{{ prometheus_user }}"
         group: "{{ prometheus_group }}"
-      when: prometheus_admin_group in group_names and bb_service_ports is defined
+      when: prometheus_admin_group in group_names
       notify: reload prometheus
   when: prometheus_blackbox_enabled
 
