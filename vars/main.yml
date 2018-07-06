@@ -39,6 +39,11 @@ prometheus_blackbox_services:
   - rdir
   - conscience
 
+prometheus_tcpcheck_services:
+  - oioproxy
+  - beanstalkd
+
+
 prometheus_blackbox_service_instances:
   metadata:
     - meta0
