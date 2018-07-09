@@ -74,7 +74,7 @@ groups:
       expr: "probe_success{job='icmpcheck'} == 0"
       for: 10s
       labels:
-        severity: low
+        severity: medium
       annotations:
         message: "{% raw %} Host {{ $labels.instance }} is unreachable {% endraw %}"
 
