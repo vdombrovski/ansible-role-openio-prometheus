@@ -107,6 +107,11 @@ scrape_configs:
       target_label: __param_target
 
     - source_labels: [module, __address__]
+      regex: ^oioswift;(.*)\=\>(.*)
+      replacement: http://${2}/info
+      target_label: __param_target
+
+    - source_labels: [module, __address__]
       regex: ^[meta0|meta1|meta2|conscience].*;(.*)=>(.*),(.*)
       replacement: http://${2}/v3.0/forward/stats?id=${3}
       target_label: __param_target
@@ -130,7 +135,7 @@ scrape_configs:
       replacement: ${1}_${2}_${3}_${4}_${5}
       target_label: instance
     - source_labels: [module, __param_target]
-      regex: ^[account|oioproxy|rawx|rdir].*;.*://(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*?)/.*
+      regex: ^[account|oioproxy|rawx|rdir|oioswift].*;.*://(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*?)/.*
       replacement: ${1}_${2}_${3}_${4}_${5}
       target_label: instance
     - source_labels: [module, __param_target]

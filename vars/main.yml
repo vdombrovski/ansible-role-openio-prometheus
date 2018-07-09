@@ -38,6 +38,7 @@ prometheus_blackbox_services:
   - redissentinel
   - rdir
   - conscience
+  - oioswift
 
 prometheus_tcpcheck_services:
   - oioproxy
@@ -64,6 +65,8 @@ prometheus_blackbox_service_instances:
     - conscience
   event:
     - beanstalkd
+  gateway:
+    - oioswift
 
 promtool_check_rules_cmd: "promtool check rules"
 promtool_check_config_cmd: "promtool check config"
