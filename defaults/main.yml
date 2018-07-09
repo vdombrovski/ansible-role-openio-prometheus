@@ -27,6 +27,7 @@ prometheus_blackbox_zk_port_regex: "^(60)[0-9]+$"
 prometheus_blackbox_port: 9115
 prometheus_blackbox_iface: eth0
 prometheus_blackbox_admin_iface: eth0
+prometheus_blackbox_targets_regenerate: true
 
 # Alert generation
 prometheus_alert_sla_default_medium: 67

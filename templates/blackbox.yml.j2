@@ -5,7 +5,6 @@
     - {{ hostvars[host]['ansible_hostname'] }},{{ hostvars[groups[prometheus_admin_group][0]]['ansible_'+prometheus_blackbox_admin_iface]['ipv4']['address'] }}=>{{ hostvars[host]['ansible_'+prometheus_blackbox_iface]['ipv4']['address'] }}
     {% endfor %}
 
-
 - labels:
     module: tcpcheck
   targets:

@@ -39,7 +39,7 @@
         group: "{{ prometheus_group }}"
       when: prometheus_admin_group in group_names
       notify: reload prometheus
-  when: prometheus_blackbox_enabled
+  when: prometheus_blackbox_enabled and prometheus_blackbox_targets_regenerate
 
 - name: "Netdata > configure"
   template:
