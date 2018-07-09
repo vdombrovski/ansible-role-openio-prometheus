@@ -47,6 +47,6 @@
     dest: "{{ prometheus_conf_dir }}/targets/netdata.yml"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
-  when: prometheus_netdata_enabled
+  when: prometheus_netdata_enabled and prometheus_admin_group in group_names
   notify: reload prometheus
 ...
