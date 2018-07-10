@@ -19,7 +19,7 @@
     prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface': true}) }}"
   when:
     - not prometheus_blackbox_iface or ('ansible_' + prometheus_blackbox_iface) in hostvars[item]
-  with_items: "{{ groups[prometheus_blackbox_group] }}"
+  with_items: "{{ groups[prometheus_monitored_group] }}"
 
 - name: Preflight > check blackbox interface (admin)
   set_fact:
