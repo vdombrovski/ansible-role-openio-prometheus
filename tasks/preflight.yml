@@ -3,6 +3,8 @@
   set_fact:
     prometheus_checks:
       - distro: false
+      - blackbox_iface: false
+      - blackbox_admin_iface: false
 
 - name: Preflight > check distro
   set_fact:
@@ -11,6 +13,20 @@
     - ansible_distribution == item.distro
     - ansible_distribution_major_version == item.version | string
   with_items: "{{prometheus_valid_distros}}"
+
+- name: Preflight > check blackbox interface
+  set_fact:
+    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface': true}) }}"
+  when:
+    - not prometheus_blackbox_iface or ('ansible_' + prometheus_blackbox_iface) in hostvars[item]
+  with_items: "{{ groups[prometheus_blackbox_group] }}"
+
+- name: Preflight > check blackbox interface (admin)
+  set_fact:
+    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_admin_iface': true}) }}"
+  when:
+    - not prometheus_blackbox_admin_iface or ('ansible_' + prometheus_blackbox_admin_iface) in hostvars[item]
+  with_items: "{{ groups[prometheus_admin_group] }}"
 
 # Keep this part at the end
 - name: Fail on failed checks
