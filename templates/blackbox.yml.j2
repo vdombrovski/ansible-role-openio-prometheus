@@ -1,15 +1,15 @@
 - labels:
     module: icmpcheck
   targets:
-    {% for host in groups[prometheus_blackbox_group] -%}
+    {% for host in groups[prometheus_monitored_group] -%}
     - {{ hostvars[host]['ansible_hostname'] }},{{ prometheus_blackbox_admin_ip }}=>{{ hostvars[host]['prometheus_blackbox_ip'] }}
     {% endfor %}
 
 - labels:
     module: tcpcheck
   targets:
-    {% for host in groups[prometheus_blackbox_group] -%}
-    {%- set loop_next = groups[prometheus_blackbox_group][0 if loop.last else loop.index] -%}
+    {% for host in groups[prometheus_monitored_group] -%}
+    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for service in prometheus_tcpcheck_services -%}
     {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
     - {{service}},{{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ port }}
@@ -21,8 +21,8 @@
 - labels:
     module: "{{service}}"
   targets:
-    {% for host in groups[prometheus_blackbox_group] -%}
-    {%- set loop_next = groups[prometheus_blackbox_group][0 if loop.last else loop.index] -%}
+    {% for host in groups[prometheus_monitored_group] -%}
+    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
     {%- if service in ['meta0', 'meta1', 'meta2', 'conscience'] -%}
     - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ hostvars[loop_next]['bb_service_ports']['oioproxy'][0] }},{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ port }}
