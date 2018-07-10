@@ -31,6 +31,18 @@
       include: "autodiscovery.yml"
       when: prometheus_blackbox_group in group_names
 
+    - name: "Blackbox > Register IP of monitored node"
+      set_fact:
+        prometheus_blackbox_ip: "\
+          {{ hostvars[inventory_hostname]['ansible_'+prometheus_blackbox_iface]['ipv4']['address'] }}"
+      when: prometheus_blackbox_group in group_names
+
+    - name: "Blackbox > Register IP of admin node"
+      set_fact:
+        prometheus_blackbox_admin_ip: "\
+          {{ hostvars[inventory_hostname]['ansible_'+prometheus_blackbox_admin_iface]['ipv4']['address'] }}"
+      when: prometheus_admin_group in group_names
+
     - name: "Blackbox > Generate blackbox targets"
       template:
         src: blackbox.yml.j2

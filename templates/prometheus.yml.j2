@@ -17,7 +17,7 @@ scrape_configs:
   scrape_interval: 10s
   scrape_timeout:  10s
   static_configs:
-    - targets: ['localhost:9090']
+    - targets: ['{{ prometheus_listen_ip }}:{{ prometheus_listen_port }}']
 
 {% if prometheus_netdata_enabled -%}
 - job_name: netdata

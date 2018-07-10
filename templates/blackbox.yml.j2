@@ -2,7 +2,7 @@
     module: icmpcheck
   targets:
     {% for host in groups[prometheus_blackbox_group] -%}
-    - {{ hostvars[host]['ansible_hostname'] }},{{ hostvars[groups[prometheus_admin_group][0]]['ansible_'+hostvars[groups[prometheus_admin_group][0]]['prometheus_blackbox_admin_iface']]['ipv4']['address'] }}=>{{ hostvars[host]['ansible_'+hostvars[host]['prometheus_blackbox_iface']]['ipv4']['address'] }}
+    - {{ hostvars[host]['ansible_hostname'] }},{{ prometheus_blackbox_admin_ip }}=>{{ hostvars[host]['prometheus_blackbox_ip'] }}
     {% endfor %}
 
 - labels:
@@ -12,7 +12,7 @@
     {%- set loop_next = groups[prometheus_blackbox_group][0 if loop.last else loop.index] -%}
     {% for service in prometheus_tcpcheck_services -%}
     {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
-    - {{service}},{{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['ansible_'+hostvars[host]['prometheus_blackbox_iface']]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+hostvars[host]['prometheus_blackbox_iface']]['ipv4']['address'] }}:{{ port }}
+    - {{service}},{{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ port }}
     {% endfor %}
     {%- endfor %}
     {%- endfor %}
@@ -25,9 +25,9 @@
     {%- set loop_next = groups[prometheus_blackbox_group][0 if loop.last else loop.index] -%}
     {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
     {%- if service in ['meta0', 'meta1', 'meta2', 'conscience'] -%}
-    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['ansible_'+hostvars[host]['prometheus_blackbox_iface']]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+hostvars[host]['prometheus_blackbox_iface']]['ipv4']['address'] }}:{{ hostvars[loop_next]['bb_service_ports']['oioproxy'][0] }},{{ hostvars[loop_next]['ansible_'+hostvars[host]['prometheus_blackbox_iface']]['ipv4']['address'] }}:{{ port }}
+    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ hostvars[loop_next]['bb_service_ports']['oioproxy'][0] }},{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ port }}
     {% else -%}
-    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['ansible_'+hostvars[host]['prometheus_blackbox_iface']]['ipv4']['address'] }}=>{{ hostvars[loop_next]['ansible_'+hostvars[host]['prometheus_blackbox_iface']]['ipv4']['address'] }}:{{ port }}
+    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ port }}
     {% endif -%}
     {% endfor %}
     {%- endfor %}
