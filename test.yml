@@ -1,6 +1,6 @@
 # Test playbook
 ---
-- hosts: localhost
+- hosts: all
   become: true
   roles:
     - role: ansible-role-openio-prometheus
