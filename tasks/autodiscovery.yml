@@ -28,8 +28,21 @@
     bb_service_ports: "{{ bb_service_ports | combine({item.item.0: item.stdout_lines}) }}"
   with_items: "{{ tmp_bb_ports['results'] }}"
 
+- name: "Get OpenIO version"
+  shell: "openio --version 2>&1 | awk '{print $2}'"
+  register: openio_version
+
+- name: "Get proper column for rawx ports"
+  set_fact:
+    openio_cluster_list_column: "Id"
+
+- name: "Get proper column for rawx ports (4.2)"
+  set_fact:
+    openio_cluster_list_column: "Addr"
+  when: "{{ openio_version.stdout | version('4.2.0', '>=') }}"
+
 - name: "Autodiscover: Get rawx ports from cluster list"
-  shell: "openio cluster local list --oio-ns OPENIO rawx -c Id -f value | awk -F ':' '{print $2}'"
+  shell: "openio cluster local list --oio-ns OPENIO rawx -c {{ openio_cluster_list_column }} -f value | awk -F ':' '{print $2}'"
   register: tmp_rawx_ports
   changed_when: false
 
