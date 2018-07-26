@@ -12,7 +12,7 @@
     {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for service in prometheus_tcpcheck_services -%}
     {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
-    - {{service}},{{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ port }}
+    - {{service}},{{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip_openio'] }}:{{ port }}
     {% endfor %}
     {%- endfor %}
     {%- endfor %}
@@ -25,9 +25,9 @@
     {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
     {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
     {%- if service in ['meta0', 'meta1', 'meta2', 'conscience'] -%}
-    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ hostvars[loop_next]['bb_service_ports']['oioproxy'][0] }},{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ port }}
+    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip_openio'] }}:{{ hostvars[loop_next]['bb_service_ports']['oioproxy'][0] }},{{ hostvars[loop_next]['prometheus_blackbox_ip_openio'] }}:{{ port }}
     {% else -%}
-    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip'] }}:{{ port }}
+    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip_openio'] }}:{{ port }}
     {% endif -%}
     {% endfor %}
     {%- endfor %}
