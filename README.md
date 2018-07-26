@@ -44,14 +44,17 @@ This role deploys a Prometheus setup, specifically tuned for the monitoring of O
 | prometheus_netdata_targets  | List of IP:PORT of netdata targets to monitor | list    |
 
 #### Collection: blackbox
-| Variable                          | Description                                      | Type    |
-| --------------------------------- | ------------------------------------------------ | ------- |
-| prometheus_blackbox_enabled       | Enable health checks                             | boolean |
-| prometheus_blackbox_iface         | Network interface of the health checked nodes    | string  |
-| prometheus_blackbox_admin_iface   | Network interface of the admin nodes             | string  |
-| prometheus_blackbox_zk_port_regex | Regex to use to determine Zookeeper client ports | string  |
-| prometheus_blackbox_port          | Port to deploy blackbox exporter on              | integer |
-| prometheus_blackbox_interval      | Interval at which health checks are scraped      | string  |
+| Variable                             | Description                                                                             | Type    |
+| ------------------------------------ | --------------------------------------------------------------------------------------- | ------- |
+| prometheus_blackbox_enabled          | Enable health checks                                                                    | boolean |
+| prometheus_blackbox_iface            | Network interface of the health checked nodes                                           | string  |
+| prometheus_blackbox_admin_iface      | Network interface of the admin nodes                                                    | string  |
+| prometheus_blackbox_zk_port_regex    | Regex to use to determine Zookeeper client ports                                        | string  |
+| prometheus_blackbox_port             | Port to deploy blackbox exporter on                                                     | integer |
+| prometheus_blackbox_interval         | Interval at which health checks are scraped                                             | string  |
+| prometheus_blackbox_node_admin_iface | Admin Network interface of the health checked nodes (needs to be joinable by the admin) | string  |
+| prometheus_blackbox_node_data_iface  | OpenIO Network interface of the health checked nodes (on which OpenIO services listen)  | string  |
+
 
 #### Alert generation
 | Variable                                 | Description                                                                                | Type    |
