@@ -108,7 +108,7 @@ scrape_configs:
 
     - source_labels: [module, __address__]
       regex: ^oioswift;(.*)\=\>(.*)
-      replacement: http://${2}/info
+      replacement: http://${2}/healthcheck
       target_label: __param_target
 
     - source_labels: [module, __address__]
