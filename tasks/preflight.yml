@@ -3,8 +3,9 @@
   set_fact:
     prometheus_checks:
       - distro: false
-      - blackbox_iface: false
-      - blackbox_admin_iface: false
+      - blackbox_iface_node_data: false
+      - blackbox_iface_node_admin: false
+      - blackbox_iface_admin: false
 
 - name: Preflight > check distro
   set_fact:
@@ -14,18 +15,25 @@
     - ansible_distribution_major_version == item.version | string
   with_items: "{{prometheus_valid_distros}}"
 
-- name: Preflight > check blackbox interface
+- name: Preflight > check blackbox interface on nodes (darta)
   set_fact:
-    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface': true}) }}"
+    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_node_data': true}) }}"
   when:
-    - not prometheus_blackbox_iface or ('ansible_' + prometheus_blackbox_iface) in hostvars[item]
+    - ('ansible_' + prometheus_blackbox_node_data_iface) in hostvars[item]
   with_items: "{{ groups[prometheus_monitored_group] }}"
 
-- name: Preflight > check blackbox interface (admin)
+- name: Preflight > check blackbox interface on nodes (admin)
   set_fact:
-    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_admin_iface': true}) }}"
+    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_node_admin': true}) }}"
   when:
-    - not prometheus_blackbox_admin_iface or ('ansible_' + prometheus_blackbox_admin_iface) in hostvars[item]
+    - ('ansible_' + prometheus_blackbox_node_admin_iface) in hostvars[item]
+  with_items: "{{ groups[prometheus_monitored_group] }}"
+
+- name: Preflight > check blackbox interface on admin
+  set_fact:
+    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_admin': true}) }}"
+  when:
+    - ('ansible_' + prometheus_blackbox_admin_iface) in hostvars[item]
   with_items: "{{ groups[prometheus_admin_group] }}"
 
 # Keep this part at the end
