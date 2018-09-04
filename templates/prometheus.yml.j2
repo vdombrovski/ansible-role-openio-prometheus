@@ -32,21 +32,25 @@ scrape_configs:
   static_configs:
     - targets: []
   metric_relabel_configs:
+      # in: openio.score;OPENIO.account_10_240_0_23_6009
+      # out: account
     - source_labels: [chart, dimension]
-      regex: openio.score;.*\.(.*?)\_.*
-      replacement: ${1}
+      regex: openio\.score;[^.]+\.([^_]+)_.+
       target_label: service
+      # in: openio.score;OPENIO.account_10_240_0_23_6009
+      # out: 10_240_0_23_6009
     - source_labels: [chart, dimension]
-      regex: openio.score;.*\.(.*?)\_(.*)
-      replacement: ${2}
+      regex: openio\.score;[^.]+\.[^_]+_(.+)
       target_label: s_instance
+      # in: openio.byte_avail;OPENIO.10_240_0_23_6001.2579104859421935362
+      # out: 10_240_0_23_6001
     - source_labels: [chart, dimension]
-      regex: openio.*[byte_avail|byte_used].*;.*\.(.*?)\..*
-      replacement: ${1}
+      regex: openio\.byte_(?:avail|free|used);[^.]+\.([^.]+)\..+
       target_label: s_instance
+      # in: openio.rep_hits_2xx;OPENIO.10_240_0_23_6201
+      # out: 10_240_0_23_6201
     - source_labels: [chart, dimension]
-      regex: openio.rep_hits.*;.*\.(.*)
-      replacement: ${1}
+      regex: openio.rep_hits[^;]+;[^.]+\.(.+)
       target_label: s_instance
 {% endif %}
 
@@ -65,82 +69,113 @@ scrape_configs:
     - source_labels: [module]
       target_label: job
 
-    # TCPCheck: Service type strip
+    # TCPCheck: Register the service type in `service`
+    # in: tcpcheck;oioproxy,worker-4,10.240.0.23=>10.240.0.24:6006
+    # out: oioproxy
     - source_labels: [module, __address__]
-      regex: tcpcheck;(.*?),.*\=\>.*
-      replacement: ${1}
+      regex: tcpcheck;([^,]+),.+
       target_label: service
+
+    # TCPCheck: Strip the service type in the address
+    # in: tcpcheck;oioproxy,worker-4,10.240.0.23=>10.240.0.24:6006
+    # out: worker-4,10.240.0.23=>10.240.0.24:6006
     - source_labels: [module, __address__]
-      regex: tcpcheck;(.*?),(.*)
-      replacement: ${2}
+      regex: tcpcheck;[^,]+,(.+)
       target_label: __address__
 
-    # Host strip
+    # Register the host in `host`
+    # in: worker-4,10.240.0.23=>10.240.0.24:6006
+    # out: worker-4
     - source_labels: [__address__]
-      regex: (.*?),.*
-      replacement: ${1}
+      regex: ([^,]+),.+
       target_label: host
+
+    # Strip the host in the address
+    # in: worker-4,10.240.0.23=>10.240.0.24:6006
+    # out: 10.240.0.23=>10.240.0.24:6006
     - source_labels: [__address__]
-      regex: .*?,(.*)
-      replacement: ${1}
+      regex: "[^,]+,(.+)"
       target_label: __address__
 
     # Target replacements
+    # in: beanstalkd;10.240.0.23=>10.240.0.24:6014
+    # out: 10.240.0.24:6014
     - source_labels: [module, __address__]
-      regex: ^[icmpcheck|tcpcheck|zookeeper|beanstalkd|redis|oioproxy].*;(.*)\=\>(.*)
-      replacement: ${2}
+      regex: (?:beanstalkd|icmpcheck|redis|redissentinel|tcpcheck|zookeeper);[^=]+=>(.+)
       target_label: __param_target
 
+    # in: rdir;10.240.0.23=>10.240.0.24:6301
+    # out: http://10.240.0.24:6301/status
     - source_labels: [module, __address__]
-      regex: ^account;(.*)\=\>(.*)
-      replacement: http://${2}/status
+      regex: (?:account|rdir);[^=]+=>(.+)
+      replacement: http://${1}/status
       target_label: __param_target
 
+    # in: oioproxy;10.240.0.23=>10.240.0.24:6006
+    # out: http://10.240.0.24:6006/v3.0/status
     - source_labels: [module, __address__]
-      regex: ^rdir;(.*)\=\>(.*)
-      replacement: http://${2}/status
+      regex: oioproxy;[^=]+=>(.+)
+      replacement: http://${1}/v3.0/status
       target_label: __param_target
 
+    # in: oioswift;10.240.0.23=>10.240.0.24:6007
+    # out: http://10.240.0.24:6007/healthcheck
     - source_labels: [module, __address__]
-      regex: ^oioproxy;(.*)\=\>(.*)
-      replacement: http://${2}/v3.0/status
+      regex: oioswift;[^=]+=>(.+)
+      replacement: http://${1}/healthcheck
       target_label: __param_target
 
+    # in: meta0;10.240.0.23=>10.240.0.24:6006,10.240.0.24:6001
+    # out: http://10.240.0.24:6006/v3.0/forward/stats?id=10.240.0.24:6001
     - source_labels: [module, __address__]
-      regex: ^oioswift;(.*)\=\>(.*)
-      replacement: http://${2}/healthcheck
+      regex: (?:conscience|meta[0-2]);[^=]+=>([^,]+),(.+)
+      replacement: http://${1}/v3.0/forward/stats?id=${2}
       target_label: __param_target
 
+    # in: rawx;10.240.0.23=>10.240.0.24:6201
+    # out: http://10.240.0.24:6201/info
     - source_labels: [module, __address__]
-      regex: ^[meta0|meta1|meta2|conscience].*;(.*)=>(.*),(.*)
-      replacement: http://${2}/v3.0/forward/stats?id=${3}
+      regex: rawx;[^=]+=>(.+)
+      replacement: http://${1}/info
       target_label: __param_target
 
-    - source_labels: [module, __address__]
-      regex: ^rawx;(.*)=>(.*)
-      replacement: http://${2}/info
-      target_label: __param_target
-
-    # Address replacements
+    # Remove the targets part of the address
+    # in: 10.240.0.23=>10.240.0.24:6201
+    # out: 10.240.0.23:6115
     - source_labels: [__address__]
-      regex: (.*)\=\>(.*)
+      regex: ([^=]+)=>.+
       replacement: ${1}:{{prometheus_blackbox_port}}
       target_label: __address__
 
     # Instance replacements
+    # Default: do nothing
     - source_labels: [__param_target]
       target_label: instance
-    - source_labels: [module, __param_target]
-      regex: ^[tcpcheck|zookeeper|redis|redissentinel|beanstalkd].*;(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*)
+
+    # Second default
+    # in: 10.240.0.24:6014
+    # out: 10_240_0_24_6014
+    # in: http://10.240.0.24:6007/healthcheck
+    # out: 10_240_0_24_6007
+    - source_labels: [__param_target]
+      regex: (?:http://)?(\d+)\.(\d+)\.(\d+)\.(\d+)\:(\d+)(?:/.+)?
       replacement: ${1}_${2}_${3}_${4}_${5}
       target_label: instance
+
+    # For icmpcheck: no port
+    # in: 10.240.0.23
+    # out: 10_240_0_23
     - source_labels: [module, __param_target]
-      regex: ^[account|oioproxy|rawx|rdir|oioswift].*;.*://(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*?)/.*
-      replacement: ${1}_${2}_${3}_${4}_${5}
+      regex: icmpcheck;(\d+)\.(\d+)\.(\d+)\.(\d+)
+      replacement: ${1}_${2}_${3}_${4}
       target_label: instance
+
+    # For the metax and conscience: get the id
+    # in: http://10.240.0.24:6006/v3.0/forward/stats?id=10.240.0.24:6001
+    # out: 10_240_0_24_6001
     - source_labels: [module, __param_target]
-      regex: ^[meta0|meta1|meta2|conscience].*;(.*)?id=(.*?)\.(.*?)\.(.*?)\.(.*?)\:(.*)
-      replacement: ${2}_${3}_${4}_${5}_${6}
+      regex: (?:conscience|meta[0-2]);.+\?id=(\d+)\.(\d+)\.(\d+)\.(\d+)\:(\d+)
+      replacement: ${1}_${2}_${3}_${4}_${5}
       target_label: instance
 {% endif %}
 
