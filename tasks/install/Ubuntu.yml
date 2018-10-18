@@ -8,15 +8,23 @@
   apt_repository:
     repo: deb https://packagecloud.io/prometheus-deb/release/ubuntu/ xenial main
     state: present
+  when: ansible_distribution_release == 'xenial'
 
 - name: Add Key
   apt_key:
     url: https://packagecloud.io/prometheus-deb/release/gpgkey
     state: present
+  when: ansible_distribution_release == 'xenial'
 
 - name: Install
   apt:
     # TODO: improve version handling
     name: "prometheus={{ prometheus_version }}-1"
     allow_unauthenticated: true
+  when: ansible_distribution_release == 'xenial'
+
+- name: Install
+  apt:
+    name: prometheus
+  when: ansible_distribution_release == 'bionic'
 ...

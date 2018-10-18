@@ -22,6 +22,8 @@ by (dim2)"
 prometheus_valid_distros:
   - distro: Ubuntu
     version: 16
+  - distro: Ubuntu
+    version: 18
   - distro: CentOS
     version: 7
 
