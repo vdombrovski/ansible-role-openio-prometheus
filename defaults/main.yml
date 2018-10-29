@@ -2,6 +2,7 @@
 # Global
 prometheus_admin_group: admin
 prometheus_monitored_group: openio
+prometheus_openio_namespace: OPENIO
 
 prometheus_listen_ip: 0.0.0.0
 prometheus_listen_port: 9090
@@ -21,7 +22,6 @@ prometheus_netdata_interval: 10s
 prometheus_netdata_targets: []
 
 # Collection: blackbox
-prometheus_blackbox_enabled: true
 prometheus_blackbox_interval: 10s
 prometheus_blackbox_zk_port_regex: "^(60)[0-9]+$"
 prometheus_blackbox_port: 9115

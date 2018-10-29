@@ -1,35 +1,42 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+
 - labels:
     module: icmpcheck
   targets:
-    {% for host in groups[prometheus_monitored_group] -%}
-    - {{ hostvars[host]['ansible_hostname'] }},{{ prometheus_blackbox_admin_ip }}=>{{ hostvars[host]['prometheus_blackbox_ip'] }}
+    {% for hostname, node_ip in cached_node_admin_ip.iteritems() %}
+    - {{ hostname }},{{ cached_admin_ip }}=>{{ node_ip }}
     {% endfor %}
 
 - labels:
     module: tcpcheck
   targets:
-    {% for host in groups[prometheus_monitored_group] -%}
-    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
-    {% for service in prometheus_tcpcheck_services -%}
-    {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
-    - {{service}},{{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip_openio'] }}:{{ port }}
+    {% for hostname, data in cached_inventory.iteritems() %}
+        {% for service, instances in data.namespaces[cached_namespace].services.iteritems() if service in prometheus_tcpcheck_services %}
+            {% set src_ip = cached_node_data_ip[cached_node_data_ip.keys()[0 if loop.last else loop.index]] %}
+            {% for conf in instances %}
+    - {{service}},{{ hostname }},{{ src_ip }}=>{{ conf.ip }}:{{ conf.port }}
+            {% endfor %}
+        {% endfor %}
     {% endfor %}
-    {%- endfor %}
-    {%- endfor %}
 
-{% for service in prometheus_blackbox_services %}
+{% for module in prometheus_monitored_services %}
 - labels:
-    module: "{{service}}"
+    module: "{{module}}"
   targets:
-    {% for host in groups[prometheus_monitored_group] -%}
-    {%- set loop_next = groups[prometheus_monitored_group][0 if loop.last else loop.index] -%}
-    {% for port in hostvars[loop_next]['bb_service_ports'][service] -%}
-    {%- if service in ['meta0', 'meta1', 'meta2', 'conscience'] -%}
-    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip_openio'] }}:{{ hostvars[loop_next]['bb_service_ports']['oioproxy'][0] }},{{ hostvars[loop_next]['prometheus_blackbox_ip_openio'] }}:{{ port }}
-    {% else -%}
-    - {{ hostvars[loop_next]['ansible_hostname'] }},{{ hostvars[host]['prometheus_blackbox_ip'] }}=>{{ hostvars[loop_next]['prometheus_blackbox_ip_openio'] }}:{{ port }}
-    {% endif -%}
+    {% for hostname, data in cached_inventory.iteritems() %}
+        {% set services = data.namespaces[cached_namespace].services %}
+        {% if module in services.keys() %}
+            {% set src_ip = cached_node_data_ip[cached_node_data_ip.keys()[0 if loop.last else loop.index]] %}
+            {% for instance in services[module] %}
+                {% if module in prometheus_proxied_services %}
+                    {# checks passing through oioproxy #}
+    - {{ hostname }},{{ src_ip }}=>{{ services.oioproxy[0].ip }}:{{ services.oioproxy[0].port }},{{ instance.ip }}:{{ instance.port }}
+                {% else %}
+                    {# direct checks #}
+    - {{ hostname }},{{ src_ip }}=>{{ instance.ip }}:{{ instance.port }}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
     {% endfor %}
-    {%- endfor %}
-
 {% endfor %}

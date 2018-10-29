@@ -1,0 +1,73 @@
+---
+- name: "Init variables"
+  set_fact:
+    cached_node_admin_ip: {}
+    cached_node_data_ip: {}
+    tmp_cached_inventories: {}
+    cached_inventory: {}
+    cached_hostnames: {}
+
+- name: "Register IP of monitored node"
+  set_fact:
+    prometheus_node_data_ip: "\
+      {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_data_iface]['ipv4']['address'] }}"
+    prometheus_node_admin_ip: "\
+      {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_admin_iface]['ipv4']['address'] }}"
+  when: prometheus_monitored_group in group_names
+
+- name: "Register IP of admin node"
+  set_fact:
+    prometheus_admin_ip: "\
+      {{ hostvars[inventory_hostname]['ansible_'+prometheus_blackbox_admin_iface]['ipv4']['address'] }}"
+  when: prometheus_admin_group in group_names
+
+- name: Cache hostnames
+  set_fact:
+    cached_hostnames: "{{ cached_hostnames | combine({item: hostvars[item]['ansible_hostname']}) }}"
+  with_items: "{{ groups[prometheus_monitored_group] }}"
+  when: prometheus_admin_group in group_names
+
+- name: Cache host data
+  set_fact:
+    cached_node_admin_ip: "{{ cached_node_admin_ip | combine({item.value: hostvars[item.key]['prometheus_node_admin_ip']}) }}"
+    cached_node_data_ip: "{{ cached_node_data_ip | combine({item.value: hostvars[item.key]['prometheus_node_data_ip']}) }}"
+    tmp_cached_inventories: "{{ tmp_cached_inventories | combine({item.value: 'inventory-' + item.key })}}"
+  with_dict:
+    - "{{ cached_hostnames }}"
+  when: prometheus_admin_group in group_names
+
+- name: "Cache admin IP and 'namespace' (for Jinja2)"
+  set_fact:
+    cached_admin_ip: "{{ hostvars[groups[prometheus_admin_group][0]]['prometheus_admin_ip'] }}"
+    cached_namespace: "{{ hostvars[groups[prometheus_monitored_group][0]]['namespace'] }}"
+  when: prometheus_admin_group in group_names
+
+- name: "Fetch inventories"
+  fetch:
+    src: /etc/oio/sds/{{namespace}}/inventory.yml
+    dest: ../inventories/{{ansible_hostname}}.yml
+    flat: true
+  when: prometheus_monitored_group in group_names
+
+- name: "Load inventories as facts"
+  include_vars:
+    file: "inventories/{{item.key}}.yml"
+    name: "{{item.value}}"
+  with_dict: "{{ tmp_cached_inventories }}"
+  when: prometheus_admin_group in group_names
+
+- name: "Consolidate inventories into single dict"
+  set_fact:
+    cached_inventory: "{{ cached_inventory | combine({item.key: hostvars[groups[prometheus_admin_group][0]][item.value]}) }}"
+  with_dict: "{{ tmp_cached_inventories }}"
+  when: prometheus_admin_group in group_names
+
+- name: "Generate healthchecks"
+  template:
+    src: ../templates/blackbox.yml.j2
+    dest: "{{ prometheus_conf_dir }}/targets/blackbox.yml"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+  when: prometheus_admin_group in group_names
+  notify: reload prometheus
+...

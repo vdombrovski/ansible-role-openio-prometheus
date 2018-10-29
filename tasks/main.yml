@@ -1,70 +1,40 @@
 ---
 - block:
-    - name: Perform checks
+    - name: "Prometheus: checks"
       include: preflight.yml
 
-    - name: Prometheus > install
+    - name: "Prometheus: install"
       include: "install/{{ ansible_distribution }}.yml"
 
-    - name: Prometheus > configure
+    - name: "Prometheus: configure"
       include: "configure.yml"
       notify: reload prometheus
 
-    # CONFIGURATION - PROMETHEUS
+    - name: "Prometheus: setup netdata"
+      template:
+        src: netdata.yml.j2
+        dest: "{{ prometheus_conf_dir }}/targets/netdata.yml"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_group }}"
+      notify: reload prometheus
+  when: prometheus_admin_group in group_names
 
-    - name: "Ensure prometheus is started/enabled"
+- name: "Prometheus: setup healthchecks"
+  include: "healthchecks.yml"
+  notify: reload prometheus
+
+- block:
+    - name: "Prometheus: start service"
       systemd:
         state: started
         daemon_reload: true
         enabled: true
         name: "prometheus"
 
-    - name: "Wait until service is up"
+    - name: "Prometheus: wait for service to start"
       wait_for:
         host: "{{ prometheus_listen_ip }}"
         port: "{{ prometheus_listen_port }}"
         delay: 10
   when: prometheus_admin_group in group_names
-
-- block:
-    - name: "Blackbox > Perform service autodiscovery"
-      include: "autodiscovery.yml"
-      when: prometheus_monitored_group in group_names
-
-    - name: "Blackbox > Register data IP of monitored node"
-      set_fact:
-        prometheus_blackbox_ip_openio: "\
-          {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_data_iface]['ipv4']['address'] }}"
-      when: prometheus_monitored_group in group_names
-
-    - name: "Blackbox > Register admin IP of monitored node"
-      set_fact:
-        prometheus_blackbox_ip: "\
-          {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_admin_iface]['ipv4']['address'] }}"
-      when: prometheus_monitored_group in group_names
-
-    - name: "Blackbox > Register IP of admin node"
-      set_fact:
-        prometheus_blackbox_admin_ip: "\
-          {{ hostvars[inventory_hostname]['ansible_'+prometheus_blackbox_admin_iface]['ipv4']['address'] }}"
-      when: prometheus_admin_group in group_names
-
-    - name: "Blackbox > Generate blackbox targets"
-      template:
-        src: blackbox.yml.j2
-        dest: "{{ prometheus_conf_dir }}/targets/blackbox.yml"
-        owner: "{{ prometheus_user }}"
-        group: "{{ prometheus_group }}"
-      when: prometheus_admin_group in group_names
-      notify: reload prometheus
-  when: prometheus_blackbox_enabled and prometheus_blackbox_targets_regenerate
-
-- name: "Netdata > configure"
-  template:
-    src: netdata.yml.j2
-    dest: "{{ prometheus_conf_dir }}/targets/netdata.yml"
-    owner: "{{ prometheus_user }}"
-    group: "{{ prometheus_group }}"
-  when: prometheus_netdata_enabled and prometheus_admin_group in group_names
-  notify: reload prometheus
 ...

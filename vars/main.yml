@@ -27,7 +27,7 @@ prometheus_valid_distros:
   - distro: CentOS
     version: 7
 
-prometheus_blackbox_services:
+prometheus_monitored_services:
   - meta0
   - meta1
   - meta2
@@ -46,6 +46,11 @@ prometheus_tcpcheck_services:
   - oioproxy
   - beanstalkd
 
+prometheus_proxied_services:
+  - meta0
+  - meta1
+  - meta2
+  - conscience
 
 prometheus_blackbox_service_instances:
   metadata:
