@@ -22,7 +22,7 @@ groups:
         message: "{% raw %}{{ $labels.service }} {{ $labels.s_instance }} on {{ $labels.instance }}: Score is 0{% endraw %}"
 
     # Per service check alert definitions
-    {% for service in prometheus_blackbox_services -%}
+    {% for service in prometheus_monitored_services -%}
     - alert: "Health check - {{ service }}"
       expr: probe_success{job='{{ service }}'} == 0
       for: 10s
@@ -79,7 +79,7 @@ groups:
         message: "{% raw %} Host {{ $labels.instance }} is unreachable {% endraw %}"
 
     # Instance count - Warning
-    {% for service in prometheus_blackbox_services -%}
+    {% for service in prometheus_monitored_services -%}
     - alert: "Number of instances low - {{service}}"
       expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service='{{ service }}'})) / count(probe_success{job='tcpcheck',service='{{ service }}'})) < {{ prometheus_alert_instance_levels_medium[service] if service in prometheus_alert_instance_levels_medium else prometheus_alert_instance_default_medium }}"
       for: 10s
@@ -91,7 +91,7 @@ groups:
     {% endfor %}
 
     # Instance count - Critical
-    {% for service in prometheus_blackbox_services -%}
+    {% for service in prometheus_monitored_services -%}
     - alert: "Number of instances critical - {{service}}"
       expr: "100 - (100 * count(count by(instance, service) (ALERTS{severity='low', alertstate='firing', service='{{ service }}'})) / count(probe_success{job='tcpcheck',service='{{ service }}'})) < {{ prometheus_alert_instance_levels_high[service] if service in prometheus_alert_instance_levels_high else prometheus_alert_instance_default_high }}"
       for: 10s
