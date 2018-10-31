@@ -73,14 +73,14 @@ scrape_configs:
     # in: tcpcheck;oioproxy,worker-4,10.240.0.23=>10.240.0.24:6006
     # out: oioproxy
     - source_labels: [module, __address__]
-      regex: tcpcheck;([^,]+),.+
+      regex: (?:tcpcheck|oioping);([^,]+),.+
       target_label: service
 
     # TCPCheck: Strip the service type in the address
     # in: tcpcheck;oioproxy,worker-4,10.240.0.23=>10.240.0.24:6006
     # out: worker-4,10.240.0.23=>10.240.0.24:6006
     - source_labels: [module, __address__]
-      regex: tcpcheck;[^,]+,(.+)
+      regex: (?:tcpcheck|oioping);[^,]+,(.+)
       target_label: __address__
 
     # Register the host in `host`
@@ -101,7 +101,7 @@ scrape_configs:
     # in: beanstalkd;10.240.0.23=>10.240.0.24:6014
     # out: 10.240.0.24:6014
     - source_labels: [module, __address__]
-      regex: (?:beanstalkd|icmpcheck|redis|redissentinel|tcpcheck|zookeeper);[^=]+=>(.+)
+      regex: (?:beanstalkd|icmpcheck|redis|redissentinel|tcpcheck|zookeeper|oioping);[^=]+=>(.+)
       target_label: __param_target
 
     # in: rdir;10.240.0.23=>10.240.0.24:6301
@@ -123,13 +123,6 @@ scrape_configs:
     - source_labels: [module, __address__]
       regex: oioswift;[^=]+=>(.+)
       replacement: http://${1}/healthcheck
-      target_label: __param_target
-
-    # in: meta0;10.240.0.23=>10.240.0.24:6006,10.240.0.24:6001
-    # out: http://10.240.0.24:6006/v3.0/forward/stats?id=10.240.0.24:6001
-    - source_labels: [module, __address__]
-      regex: (?:conscience|meta[0-2]);[^=]+=>([^,]+),(.+)
-      replacement: http://${1}/v3.0/forward/stats?id=${2}
       target_label: __param_target
 
     # in: rawx;10.240.0.23=>10.240.0.24:6201
@@ -170,13 +163,6 @@ scrape_configs:
       replacement: ${1}_${2}_${3}_${4}
       target_label: instance
 
-    # For the metax and conscience: get the id
-    # in: http://10.240.0.24:6006/v3.0/forward/stats?id=10.240.0.24:6001
-    # out: 10_240_0_24_6001
-    - source_labels: [module, __param_target]
-      regex: (?:conscience|meta[0-2]);.+\?id=(\d+)\.(\d+)\.(\d+)\.(\d+)\:(\d+)
-      replacement: ${1}_${2}_${3}_${4}_${5}
-      target_label: instance
 {% endif %}
 
 {% if prometheus_alertmanager_enabled %}

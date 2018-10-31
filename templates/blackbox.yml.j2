@@ -20,6 +20,19 @@
         {% endfor %}
     {% endfor %}
 
+- labels:
+    module: oioping
+  targets:
+    {% for hostname, data in cached_inventory.iteritems() %}
+        {% for service, instances in data.namespaces[cached_namespace].services.iteritems() if service in prometheus_oioping_services %}
+            {% set src_ip = cached_node_data_ip[cached_node_data_ip.keys()[0 if loop.last else loop.index]] %}
+            {% for conf in instances %}
+    - {{service}},{{ hostname }},{{ src_ip }}=>{{ conf.ip }}:{{ conf.port }}
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+
+
 {% for module in prometheus_monitored_services %}
 - labels:
     module: "{{module}}"
@@ -29,13 +42,7 @@
         {% if module in services.keys() %}
             {% set src_ip = cached_node_data_ip[cached_node_data_ip.keys()[0 if loop.last else loop.index]] %}
             {% for instance in services[module] %}
-                {% if module in prometheus_proxied_services %}
-                    {# checks passing through oioproxy #}
-    - {{ hostname }},{{ src_ip }}=>{{ services.oioproxy[0].ip }}:{{ services.oioproxy[0].port }},{{ instance.ip }}:{{ instance.port }}
-                {% else %}
-                    {# direct checks #}
     - {{ hostname }},{{ src_ip }}=>{{ instance.ip }}:{{ instance.port }}
-                {% endif %}
             {% endfor %}
         {% endif %}
     {% endfor %}

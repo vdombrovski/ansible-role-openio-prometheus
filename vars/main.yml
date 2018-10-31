@@ -28,9 +28,6 @@ prometheus_valid_distros:
     version: 7
 
 prometheus_monitored_services:
-  - meta0
-  - meta1
-  - meta2
   - rawx
   - zookeeper
   - oioproxy
@@ -39,14 +36,13 @@ prometheus_monitored_services:
   - redis
   - redissentinel
   - rdir
-  - conscience
   - oioswift
 
 prometheus_tcpcheck_services:
   - oioproxy
   - beanstalkd
 
-prometheus_proxied_services:
+prometheus_oioping_services:
   - meta0
   - meta1
   - meta2
