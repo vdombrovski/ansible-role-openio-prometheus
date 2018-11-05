@@ -69,7 +69,12 @@ scrape_configs:
     - source_labels: [module]
       target_label: job
 
-    # TCPCheck: Register the service type in `service`
+    # ALL: Register job as service
+    - source_labels: [module]
+      regex: .*
+      target_label: service
+
+    # TCPCheck, OIOPING: Register the service type in `service`
     # in: tcpcheck;oioproxy,worker-4,10.240.0.23=>10.240.0.24:6006
     # out: oioproxy
     - source_labels: [module, __address__]
