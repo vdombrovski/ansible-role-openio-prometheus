@@ -1,11 +1,12 @@
 ---
 - name: "Init variables"
   set_fact:
-    cached_node_admin_ip: {}
-    cached_node_data_ip: {}
+    tmp_cached_node_admin_ip: {}
+    tmp_cached_node_data_ip: {}
     tmp_cached_inventories: {}
-    cached_inventory: {}
-    cached_hostnames: {}
+    tmp_cached_inventory: {}
+    tmp_cached_hostnames: {}
+    tmp_cached_namespace: ""
 
 - name: "Register IP of monitored node"
   set_fact:
@@ -23,23 +24,23 @@
 
 - name: Cache hostnames
   set_fact:
-    cached_hostnames: "{{ cached_hostnames | combine({item: hostvars[item]['ansible_hostname']}) }}"
+    tmp_cached_hostnames: "{{ tmp_cached_hostnames | combine({item: hostvars[item]['ansible_hostname']}) }}"
   with_items: "{{ groups[prometheus_monitored_group] }}"
   when: prometheus_admin_group in group_names
 
 - name: Cache host data
   set_fact:
-    cached_node_admin_ip: "{{ cached_node_admin_ip | combine({item.value: hostvars[item.key]['prometheus_node_admin_ip']}) }}"
-    cached_node_data_ip: "{{ cached_node_data_ip | combine({item.value: hostvars[item.key]['prometheus_node_data_ip']}) }}"
+    tmp_cached_node_admin_ip: "{{ tmp_cached_node_admin_ip | combine({item.value: hostvars[item.key]['prometheus_node_admin_ip']}) }}"
+    tmp_cached_node_data_ip: "{{ tmp_cached_node_data_ip | combine({item.value: hostvars[item.key]['prometheus_node_data_ip']}) }}"
     tmp_cached_inventories: "{{ tmp_cached_inventories | combine({item.value: 'inventory-' + item.key })}}"
   with_dict:
-    - "{{ cached_hostnames }}"
+    - "{{ tmp_cached_hostnames }}"
   when: prometheus_admin_group in group_names
 
 - name: "Cache admin IP and 'namespace' (for Jinja2)"
   set_fact:
-    cached_admin_ip: "{{ hostvars[groups[prometheus_admin_group][0]]['prometheus_admin_ip'] }}"
-    cached_namespace: "{{ hostvars[groups[prometheus_monitored_group][0]]['namespace'] }}"
+    tmp_cached_admin_ip: "{{ prometheus_admin_ip }}"
+    tmp_cached_namespace: "{{ hostvars[groups[prometheus_monitored_group][0]]['namespace'] }}"
   when: prometheus_admin_group in group_names
 
 - name: "Fetch inventories"
@@ -58,7 +59,7 @@
 
 - name: "Consolidate inventories into single dict"
   set_fact:
-    cached_inventory: "{{ cached_inventory | combine({item.key: hostvars[groups[prometheus_admin_group][0]][item.value]}) }}"
+    tmp_cached_inventory: "{{ tmp_cached_inventory | combine({item.key: hostvars[groups[prometheus_admin_group][0]][item.value]}) }}"
   with_dict: "{{ tmp_cached_inventories }}"
   when: prometheus_admin_group in group_names
 
