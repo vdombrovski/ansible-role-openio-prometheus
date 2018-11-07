@@ -2,6 +2,18 @@
 ---
 - hosts: all
   become: true
+  pre_tasks:
+    - name: Set NS fact
+      set_fact:
+        namespace: OPENIO
+    - name: Seed directory for NS
+      file:
+        path: /etc/oio/sds/OPENIO
+        state: directory
+    - name: Seed inventory on nodes
+      copy:
+        src: inventory.yml
+        dest: /etc/oio/sds/OPENIO/inventory.yml
   roles:
     - role: ansible-role-openio-prometheus
 ...
