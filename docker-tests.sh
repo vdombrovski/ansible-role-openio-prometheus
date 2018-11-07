@@ -110,7 +110,7 @@ start_container() {
       set -x
       docker run --detach \
         "${run_opts[@]}" \
-        --volume="${PWD}:${role_dir}:ro" \
+        --volume="${PWD}:${role_dir}:rw" \
         "${image_tag}" \
         "${init}" \
         > "${container_id}"
