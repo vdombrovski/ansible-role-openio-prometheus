@@ -30,8 +30,10 @@
 
 - name: Cache host data
   set_fact:
-    tmp_cached_node_admin_ip: "{{ tmp_cached_node_admin_ip | combine({item.value: hostvars[item.key]['prometheus_node_admin_ip']}) }}"
-    tmp_cached_node_data_ip: "{{ tmp_cached_node_data_ip | combine({item.value: hostvars[item.key]['prometheus_node_data_ip']}) }}"
+    tmp_cached_node_admin_ip: "{{ tmp_cached_node_admin_ip |\
+     combine({item.value: hostvars[item.key]['prometheus_node_admin_ip']}) }}"
+    tmp_cached_node_data_ip: "{{ tmp_cached_node_data_ip |\
+     combine({item.value: hostvars[item.key]['prometheus_node_data_ip']}) }}"
     tmp_cached_inventories: "{{ tmp_cached_inventories | combine({item.value: 'inventory-' + item.key })}}"
   with_dict:
     - "{{ tmp_cached_hostnames }}"
@@ -48,7 +50,7 @@
     src: "/etc/oio/sds/{{hostvars[inventory_hostname]['namespace']}}/inventory.yml"
     dest: "../inventories/{{hostvars[inventory_hostname]['namespace']}}/{{ansible_hostname}}.yml"
     flat: true
-  changed_when: False
+  changed_when: false
   when: prometheus_monitored_group in group_names
 
 - name: "Load inventories as facts"
@@ -60,7 +62,8 @@
 
 - name: "Consolidate inventories into single dict"
   set_fact:
-    tmp_cached_inventory: "{{ tmp_cached_inventory | combine({item.key: hostvars[groups[prometheus_admin_group][0]][item.value]}) }}"
+    tmp_cached_inventory: "{{ tmp_cached_inventory |\
+      combine({item.key: hostvars[groups[prometheus_admin_group][0]][item.value]}) }}"
   with_dict: "{{ tmp_cached_inventories }}"
   when: prometheus_admin_group in group_names
 
