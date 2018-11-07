@@ -43,16 +43,24 @@
     tmp_cached_namespace: "{{ hostvars[groups[prometheus_monitored_group][0]]['namespace'] }}"
   when: prometheus_admin_group in group_names
 
+- name: Create temp directory to harbor inventories
+  tempfile:
+    state: directory
+    prefix: inventory
+  register: tmp_inventory_location
+  when: prometheus_admin_group in group_names
+  changed_when: False
+
 - name: "Fetch inventories"
   fetch:
-    src: /etc/oio/sds/{{namespace}}/inventory.yml
-    dest: ../inventories/{{ansible_hostname}}.yml
+    src: /etc/oio/sds/{{hostvars[inventory_hostname]['namespace']}}/inventory.yml
+    dest: "{{ tmp_inventory_location['path'] }}/{{ansible_hostname}}.yml"
     flat: true
-  when: prometheus_monitored_group in group_names
+  changed_when: False
 
 - name: "Load inventories as facts"
   include_vars:
-    file: "inventories/{{item.key}}.yml"
+    file: "{{ tmp_inventory_location['path'] }}/{{item.key}}.yml"
     name: "{{item.value}}"
   with_dict: "{{ tmp_cached_inventories }}"
   when: prometheus_admin_group in group_names
@@ -69,6 +77,8 @@
     dest: "{{ prometheus_conf_dir }}/targets/blackbox.yml"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
-  when: prometheus_admin_group in group_names
+  when:
+    - prometheus_admin_group in group_names
+    - groups[prometheus_monitored_group] | length > 1
   notify: reload prometheus
 ...

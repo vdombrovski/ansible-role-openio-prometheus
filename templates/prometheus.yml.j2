@@ -54,7 +54,6 @@ scrape_configs:
       target_label: s_instance
 {% endif %}
 
-{% if prometheus_blackbox_enabled -%}
 - job_name: blackbox
   scrape_interval: {{ prometheus_blackbox_interval }}
   metrics_path: /probe
@@ -167,8 +166,6 @@ scrape_configs:
       regex: icmpcheck;(\d+)\.(\d+)\.(\d+)\.(\d+)
       replacement: ${1}_${2}_${3}_${4}
       target_label: instance
-
-{% endif %}
 
 {% if prometheus_alertmanager_enabled %}
 alerting:
