@@ -18,7 +18,7 @@
         owner: "{{ prometheus_user }}"
         group: "{{ prometheus_group }}"
       notify: reload prometheus
-  when: prometheus_admin_group in group_names
+  when: inventory_hostname == prometheus_admin_host
 
 - name: "Prometheus: setup healthchecks"
   include: "healthchecks.yml"
@@ -37,5 +37,5 @@
         host: "{{ prometheus_listen_ip }}"
         port: "{{ prometheus_listen_port }}"
         delay: 10
-  when: prometheus_admin_group in group_names
+  when: inventory_hostname == prometheus_admin_host
 ...

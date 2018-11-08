@@ -1,7 +1,7 @@
 ---
 # Global
-prometheus_admin_group: admin
-prometheus_monitored_group: openio
+prometheus_admin_host: ""
+prometheus_monitored_hosts: []
 prometheus_openio_namespace: OPENIO
 
 prometheus_listen_ip: 0.0.0.0

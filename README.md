@@ -15,8 +15,8 @@ This role deploys a Prometheus setup, specifically tuned for the monitoring of O
 #### Groups and Network
 | Variable                   | Description                                       | Type   |
 | -------------------------- | ------------------------------------------------- | ------ |
-| prometheus_blackbox_group  | Ansible group containing all health checked nodes | string |
-| prometheus_admin_group     | Ansible group containing the admin machine        | string |
+| prometheus_monitored_hosts  | List of hostnames of all monitored hosts | list |
+| prometheus_admin_host     | Hostname of admin machine       | string |
 
 #### Global
 | Variable                     | Description                                | Type    |

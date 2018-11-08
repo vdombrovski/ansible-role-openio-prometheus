@@ -14,19 +14,19 @@
       {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_data_iface]['ipv4']['address'] }}"
     prometheus_node_admin_ip: "\
       {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_admin_iface]['ipv4']['address'] }}"
-  when: prometheus_monitored_group in group_names
+  when: inventory_hostname in prometheus_monitored_hosts
 
 - name: "Register IP of admin node"
   set_fact:
     prometheus_admin_ip: "\
       {{ hostvars[inventory_hostname]['ansible_'+prometheus_blackbox_admin_iface]['ipv4']['address'] }}"
-  when: prometheus_admin_group in group_names
+  when: inventory_hostname == prometheus_admin_host
 
 - name: Cache hostnames
   set_fact:
     tmp_cached_hostnames: "{{ tmp_cached_hostnames | combine({item: hostvars[item]['ansible_hostname']}) }}"
-  with_items: "{{ groups[prometheus_monitored_group] }}"
-  when: prometheus_admin_group in group_names
+  with_items: prometheus_monitored_hosts
+  when: inventory_hostname == prometheus_admin_host
 
 - name: Cache host data
   set_fact:
@@ -37,13 +37,13 @@
     tmp_cached_inventories: "{{ tmp_cached_inventories | combine({item.value: 'inventory-' + item.key })}}"
   with_dict:
     - "{{ tmp_cached_hostnames }}"
-  when: prometheus_admin_group in group_names
+  when: inventory_hostname == prometheus_admin_host
 
 - name: "Cache admin IP and 'namespace' (for Jinja2)"
   set_fact:
     tmp_cached_admin_ip: "{{ prometheus_admin_ip }}"
-    tmp_cached_namespace: "{{ hostvars[groups[prometheus_monitored_group][0]]['namespace'] }}"
-  when: prometheus_admin_group in group_names
+    tmp_cached_namespace: "{{ hostvars[prometheus_monitored_hosts[0]]['namespace'] }}"
+  when: inventory_hostname == prometheus_admin_host
 
 - name: "Fetch inventories"
   fetch:
@@ -51,21 +51,21 @@
     dest: "../inventories/{{hostvars[inventory_hostname]['namespace']}}/{{ansible_hostname}}.yml"
     flat: true
   changed_when: false
-  when: prometheus_monitored_group in group_names
+  when: inventory_hostname in prometheus_monitored_hosts
 
 - name: "Load inventories as facts"
   include_vars:
     file: "../inventories/{{tmp_cached_namespace}}/{{item.key}}.yml"
     name: "{{item.value}}"
   with_dict: "{{ tmp_cached_inventories }}"
-  when: prometheus_admin_group in group_names
+  when: inventory_hostname == prometheus_admin_host
 
 - name: "Consolidate inventories into single dict"
   set_fact:
     tmp_cached_inventory: "{{ tmp_cached_inventory |\
-      combine({item.key: hostvars[groups[prometheus_admin_group][0]][item.value]}) }}"
+      combine({item.key: hostvars[prometheus_admin_host][item.value]}) }}"
   with_dict: "{{ tmp_cached_inventories }}"
-  when: prometheus_admin_group in group_names
+  when: inventory_hostname == prometheus_admin_host
 
 - name: "Generate healthchecks"
   template:
@@ -74,7 +74,7 @@
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
   when:
-    - prometheus_admin_group in group_names
-    - groups[prometheus_monitored_group] | length > 1
+    - inventory_hostname == prometheus_admin_host
+    - prometheus_monitored_hosts | length > 1
   notify: reload prometheus
 ...

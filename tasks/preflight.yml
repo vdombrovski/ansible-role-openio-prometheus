@@ -20,35 +20,34 @@
   set_fact:
     prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_node_data': false}) }}"
   when:
-    - prometheus_monitored_group in group_names
+    - inventory_hostname in prometheus_monitored_hosts
     - ('ansible_' + prometheus_blackbox_node_data_iface) is not defined
 
 - name: Preflight > check blackbox interface on nodes (admin)
   set_fact:
     prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_node_admin': false}) }}"
   when:
-    - prometheus_monitored_group in group_names
+    - inventory_hostname in prometheus_monitored_hosts
     - ('ansible_' + prometheus_blackbox_node_admin_iface) is not defined
 
 - name: Preflight > check blackbox interface on admin
   set_fact:
     prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_admin': false}) }}"
   when:
-    - prometheus_monitored_group in group_names
+    - inventory_hostname == prometheus_admin_host
     - ('ansible_' + prometheus_blackbox_admin_iface) is not defined
-  with_items: "{{ groups[prometheus_admin_group] }}"
 
 - name: Perform a stat on the inventory file
   stat:
     path: "/etc/oio/sds/{{ prometheus_openio_namespace }}/inventory.yml"
   register: inventory_file
-  when: prometheus_monitored_group in group_names
+  when: inventory_hostname in prometheus_monitored_hosts
 
 - name: Preflight > check that all nodes have an inventory.yml file
   set_fact:
     prometheus_checks: "{{ prometheus_checks | combine({'inventory_file': false})}}"
   when:
-    - prometheus_monitored_group in group_names
+    - inventory_hostname in prometheus_monitored_hosts
     - not inventory_file.stat.exists
 
 # Keep this part at the end
