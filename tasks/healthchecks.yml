@@ -25,7 +25,7 @@
 - name: Cache hostnames
   set_fact:
     tmp_cached_hostnames: "{{ tmp_cached_hostnames | combine({item: hostvars[item]['ansible_hostname']}) }}"
-  with_items: prometheus_monitored_hosts
+  with_items: "{{ prometheus_monitored_hosts }}"
   when: inventory_hostname == prometheus_admin_host
 
 - name: Cache host data
