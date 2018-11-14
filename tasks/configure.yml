@@ -10,6 +10,7 @@
     - "{{ prometheus_conf_dir }}/alerts"
     - "{{ prometheus_conf_dir }}/rules"
     - "{{ prometheus_conf_dir }}/targets"
+    - "{{ prometheus_storage_path }}"
   loop_control:
     loop_var: dirname
 
