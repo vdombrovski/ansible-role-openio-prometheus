@@ -12,8 +12,9 @@
     module: tcpcheck
   targets:
     {% for hostname, data in tmp_cached_inventory.iteritems() %}
+        {% set hloop = loop %}
         {% for service, instances in data.namespaces[tmp_cached_namespace].services.iteritems() if service in prometheus_tcpcheck_services %}
-            {% set src_ip = tmp_cached_node_data_ip[tmp_cached_node_data_ip.keys()[0 if loop.last else loop.index]] %}
+            {% set src_ip = tmp_cached_node_data_ip[tmp_cached_node_data_ip.keys()[0 if hloop.last else hloop.index]] %}
             {% for conf in instances %}
     - {{service}},{{ hostname }},{{ src_ip }}=>{{ conf.ip }}:{{ conf.port }}
             {% endfor %}
@@ -24,8 +25,9 @@
     module: oioping
   targets:
     {% for hostname, data in tmp_cached_inventory.iteritems() %}
+        {% set hloop = loop %}
         {% for service, instances in data.namespaces[tmp_cached_namespace].services.iteritems() if service in prometheus_oioping_services %}
-            {% set src_ip = tmp_cached_node_data_ip[tmp_cached_node_data_ip.keys()[0 if (loop.index >= tmp_cached_node_data_ip | length) else loop.index]] %}
+            {% set src_ip = tmp_cached_node_data_ip[tmp_cached_node_data_ip.keys()[0 if hloop.last else hloop.index]] %}
             {% for conf in instances %}
     - {{service}},{{ hostname }},{{ src_ip }}=>{{ conf.ip }}:{{ conf.port }}
             {% endfor %}
@@ -38,9 +40,10 @@
     module: "{{module}}"
   targets:
     {% for hostname, data in tmp_cached_inventory.iteritems() %}
+        {% set hloop = loop %}
         {% set services = data.namespaces[tmp_cached_namespace].services %}
         {% if module in services.keys() %}
-            {% set src_ip = tmp_cached_node_data_ip[tmp_cached_node_data_ip.keys()[0 if (loop.index >= tmp_cached_node_data_ip | length) else loop.index | int]] %}
+            {% set src_ip = tmp_cached_node_data_ip[tmp_cached_node_data_ip.keys()[0 if hloop.last else hloop.index]] %}
             {% for instance in services[module] %}
     - {{ hostname }},{{ src_ip }}=>{{ instance.ip }}:{{ instance.port }}
             {% endfor %}
