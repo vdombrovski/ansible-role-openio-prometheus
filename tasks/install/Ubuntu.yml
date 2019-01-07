@@ -26,6 +26,7 @@
   until: install_packages_xenial is success
   retries: 5
   delay: 2
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Install
   apt:
@@ -35,4 +36,5 @@
   until: install_packages_bionic is success
   retries: 5
   delay: 2
+  ignore_errors: "{{ ansible_check_mode }}"
 ...

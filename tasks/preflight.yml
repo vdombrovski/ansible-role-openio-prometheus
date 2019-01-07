@@ -14,7 +14,7 @@
   set_fact:
     prometheus_checks: "{{ prometheus_checks | combine({'admin_host': false}) }}"
   when:
-    - prometheus_admin_host == ""
+    - not prometheus_admin_host
 
 - name: Preflight > check that at least one monitored host is defined
   set_fact:
@@ -28,7 +28,7 @@
   when:
     - ansible_distribution == item.distro
     - ansible_distribution_major_version == item.version | string
-  with_items: "{{prometheus_valid_distros}}"
+  with_items: "{{ prometheus_valid_distros }}"
 
 - name: Preflight > check blackbox interface on nodes (data)
   set_fact:
@@ -59,10 +59,11 @@
 
 - name: Preflight > check that all nodes have an inventory.yml file
   set_fact:
-    prometheus_checks: "{{ prometheus_checks | combine({'inventory_file': false})}}"
+    prometheus_checks: "{{ prometheus_checks | combine({'inventory_file': false}) }}"
   when:
     - inventory_hostname in prometheus_monitored_hosts
     - not inventory_file.stat.exists
+    - not ansible_check_mode
 
 # Keep this part at the end
 - name: Fail on failed checks

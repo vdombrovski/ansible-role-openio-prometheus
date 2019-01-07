@@ -39,7 +39,7 @@
 - name: "Create prometheus run options"
   set_fact:
     prometheus_run_opts:
-      config.file: "{{ prometheus_conf_dir}}/prometheus.yml"
+      config.file: "{{ prometheus_conf_dir }}/prometheus.yml"
       storage.tsdb.path: "{{ prometheus_storage_path }}"
       storage.tsdb.retention: "{{ prometheus_storage_retention }}"
       web.enable-lifecycle: ""
