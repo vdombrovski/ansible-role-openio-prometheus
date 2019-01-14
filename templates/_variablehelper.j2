@@ -1,0 +1,10 @@
+{% set _gather_keys = ["ansible_hostname", "prometheus_blackbox_ip", "bb_service_ports", "prometheus_blackbox_ip_openio"] %}
+{% set _gathered_hostvars = {} %}
+{% for host in groups['openio'] %}
+{%   set _host_vars = {} %}
+{%   for var in _gather_keys %}
+{%     set _ = _host_vars.update( {var: hostvars[host][var]} ) %}
+{%   endfor %}
+{%   set _ = _gathered_hostvars.update( {host: _host_vars} ) %}
+{% endfor %}
+{{ _gathered_hostvars | to_yaml }}
