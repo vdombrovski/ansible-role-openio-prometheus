@@ -26,6 +26,8 @@ prometheus_valid_distros:
     version: 18
   - distro: CentOS
     version: 7
+  - distro: RedHat
+    version: 7
 
 prometheus_monitored_services:
   - rawx
