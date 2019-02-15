@@ -17,6 +17,7 @@ This role deploys a Prometheus setup, specifically tuned for the monitoring of O
 | -------------------------- | ------------------------------------------------- | ------ |
 | prometheus_monitored_hosts  | List of hostnames of all monitored hosts | list |
 | prometheus_admin_host     | Hostname of admin machine       | string |
+| prometheus_systemd_limits | Limits to setup in systemd unit file | dict |
 
 #### Global
 | Variable                     | Description                                | Type    |

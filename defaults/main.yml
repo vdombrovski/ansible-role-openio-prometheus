@@ -45,4 +45,15 @@ prometheus_alert_instance_levels_high: {}
 prometheus_alertmanager_enabled: false
 prometheus_alertmanager_interval: 10s
 prometheus_alertmanager_targets: []
+
+# Limits to set in systemd unit file
+prometheus_systemd_limits:
+  MemoryAccounting: 'true'
+  MemoryLimit: '24G'
+  LimitNOFILE: '1048576'
+  LimitNPROC: '1048576'
+  LimitCORE: 'infinity'
+  User: 'prometheus'
+  Restart: 'always'
+  RestartSec: '2'
 ...

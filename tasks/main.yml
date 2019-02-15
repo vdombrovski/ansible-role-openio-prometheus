@@ -7,6 +7,24 @@
     - name: "Prometheus: install"
       include: "install/{{ ansible_distribution }}.yml"
 
+    - name: 'Prometheus: Create systemd service configuration directory'
+      file:
+        path: /etc/systemd/system/prometheus.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: "Prometheus: configure systemd service limits"
+      ini_file:
+        path: /etc/systemd/system/prometheus.service.d/limits.conf
+        section: 'Service'
+        option: '{{ item.key }}'
+        value: '{{ item.value }}'
+        backup: true
+      notify: restart prometheus
+      with_dict: '{{ prometheus_systemd_limits }}'
+
     - name: "Prometheus: configure"
       include: "configure.yml"
       notify: reload prometheus
