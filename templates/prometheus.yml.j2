@@ -105,7 +105,7 @@ scrape_configs:
     # in: beanstalkd;10.240.0.23=>10.240.0.24:6014
     # out: 10.240.0.24:6014
     - source_labels: [module, __address__]
-      regex: (?:beanstalkd|icmpcheck|redis|redissentinel|tcpcheck|zookeeper|oioping);[^=]+=>(.+)
+      regex: (?:beanstalkd|icmpcheck|redis|redissentinel|tcpcheck|zookeeper|oioping|blackbox);[^=]+=>(.+)
       target_label: __param_target
 
     # in: rdir;10.240.0.23=>10.240.0.24:6301

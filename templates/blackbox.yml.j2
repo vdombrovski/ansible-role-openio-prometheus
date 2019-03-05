@@ -22,6 +22,14 @@
     {% endfor %}
 
 - labels:
+    module: blackbox
+  targets:
+    - {{ prometheus_admin_host }},{{ tmp_cached_admin_ip }}=>{{ tmp_cached_admin_ip }}:{{ prometheus_blackbox_port }}
+    {% for hostname, data in tmp_cached_inventory.iteritems() %}
+    - {{ hostname }},{{ tmp_cached_node_data_ip[hostname] }}=>{{ tmp_cached_node_data_ip[hostname] }}:{{ prometheus_blackbox_port }}
+    {% endfor %}
+
+- labels:
     module: oioping
   targets:
     {% for hostname, data in tmp_cached_inventory.iteritems() %}

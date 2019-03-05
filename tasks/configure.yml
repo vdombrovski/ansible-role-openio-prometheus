@@ -23,10 +23,9 @@
     - "{{ prometheus_aggregation_rules }}"
 
 - name: "Setup alerting rules"
-  template:
-    src: alert.rules.j2
-    dest: "{{ prometheus_conf_dir }}/alerts/default.rules"
-    validate: "{{ promtool_check_rules_cmd }} %s"
+  copy:
+    content: "{{ lookup('file', 'alert_rules.yml') | format_alerts }}"
+    dest: "/etc/prometheus/alerts/default.rules"
 
 - name: "Setup prometheus config yml"
   template:
