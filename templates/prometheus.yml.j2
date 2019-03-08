@@ -68,25 +68,6 @@ scrape_configs:
     - source_labels: [module]
       target_label: job
 
-    # ALL: Register job as service
-    - source_labels: [module]
-      regex: .*
-      target_label: service
-
-    # TCPCheck, OIOPING: Register the service type in `service`
-    # in: tcpcheck;oioproxy,worker-4,10.240.0.23=>10.240.0.24:6006
-    # out: oioproxy
-    - source_labels: [module, __address__]
-      regex: (?:tcpcheck|oioping);([^,]+),.+
-      target_label: service
-
-    # TCPCheck: Strip the service type in the address
-    # in: tcpcheck;oioproxy,worker-4,10.240.0.23=>10.240.0.24:6006
-    # out: worker-4,10.240.0.23=>10.240.0.24:6006
-    - source_labels: [module, __address__]
-      regex: (?:tcpcheck|oioping);[^,]+,(.+)
-      target_label: __address__
-
     # Register the host in `host`
     # in: worker-4,10.240.0.23=>10.240.0.24:6006
     # out: worker-4
@@ -105,7 +86,7 @@ scrape_configs:
     # in: beanstalkd;10.240.0.23=>10.240.0.24:6014
     # out: 10.240.0.24:6014
     - source_labels: [module, __address__]
-      regex: (?:beanstalkd|icmpcheck|redis|redissentinel|tcpcheck|zookeeper|oioping);[^=]+=>(.+)
+      regex: (?:beanstalkd|icmpcheck|redis|redissentinel|tcpcheck|zookeeper|oioping|blackbox);[^=]+=>(.+)
       target_label: __param_target
 
     # in: rdir;10.240.0.23=>10.240.0.24:6301

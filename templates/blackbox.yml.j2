@@ -8,36 +8,50 @@
     - {{ hostname }},{{ tmp_cached_admin_ip }}=>{{ node_ip }}
     {% endfor %}
 
+{% for svc in prometheus_tcpcheck_services %}
 - labels:
     module: tcpcheck
+    service: "{{ svc }}"
   targets:
     {% for hostname, data in tmp_cached_inventory.iteritems() %}
         {% set hloop = loop %}
-        {% for service, instances in data.namespaces[tmp_cached_namespace].services.iteritems() if service in prometheus_tcpcheck_services %}
+        {% for service, instances in data.namespaces[tmp_cached_namespace].services.iteritems() if service == svc %}
             {% set src_ip = tmp_cached_node_data_ip[tmp_cached_node_data_ip.keys()[0 if hloop.last else hloop.index]] %}
             {% for conf in instances %}
-    - {{service}},{{ hostname }},{{ src_ip }}=>{{ conf.ip }}:{{ conf.port }}
+    - {{ hostname }},{{ src_ip }}=>{{ conf.ip }}:{{ conf.port }}
             {% endfor %}
         {% endfor %}
     {% endfor %}
+{% endfor %}
 
 - labels:
+    module: blackbox
+  targets:
+    - {{ prometheus_admin_host }},{{ tmp_cached_admin_ip }}=>{{ tmp_cached_admin_ip }}:{{ prometheus_blackbox_port }}
+    {% for hostname, data in tmp_cached_inventory.iteritems() %}
+    - {{ hostname }},{{ tmp_cached_node_data_ip[hostname] }}=>{{ tmp_cached_node_data_ip[hostname] }}:{{ prometheus_blackbox_port }}
+    {% endfor %}
+
+{% for svc in prometheus_oioping_services %}
+- labels:
     module: oioping
+    service: "{{ svc }}"
   targets:
     {% for hostname, data in tmp_cached_inventory.iteritems() %}
         {% set hloop = loop %}
-        {% for service, instances in data.namespaces[tmp_cached_namespace].services.iteritems() if service in prometheus_oioping_services %}
+        {% for service, instances in data.namespaces[tmp_cached_namespace].services.iteritems() if service == svc %}
             {% set src_ip = tmp_cached_node_data_ip[tmp_cached_node_data_ip.keys()[0 if hloop.last else hloop.index]] %}
             {% for conf in instances %}
-    - {{service}},{{ hostname }},{{ src_ip }}=>{{ conf.ip }}:{{ conf.port }}
+    - {{ hostname }},{{ src_ip }}=>{{ conf.ip }}:{{ conf.port }}
             {% endfor %}
         {% endfor %}
     {% endfor %}
-
+{% endfor %}
 
 {% for module in prometheus_monitored_services %}
 - labels:
-    module: "{{module}}"
+    module: "{{ module }}"
+    service: "{{ module }}"
   targets:
     {% for hostname, data in tmp_cached_inventory.iteritems() %}
         {% set hloop = loop %}
