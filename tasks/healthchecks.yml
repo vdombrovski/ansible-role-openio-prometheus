@@ -24,7 +24,7 @@
 
 - name: Cache hostnames
   set_fact:
-    tmp_cached_hostnames: "{{ tmp_cached_hostnames | combine({item: hostvars[item]['ansible_hostname']}) }}"
+    tmp_cached_hostnames: "{{ tmp_cached_hostnames | combine({item: hostvars[item]['ansible_nodename']}) }}"
   with_items: "{{ prometheus_monitored_hosts }}"
   when: inventory_hostname == prometheus_admin_host
 
@@ -48,7 +48,7 @@
 - name: "Fetch inventories"
   fetch:
     src: "/etc/oio/sds/{{ hostvars[inventory_hostname]['namespace'] }}/inventory.yml"
-    dest: "../inventories/{{ hostvars[inventory_hostname]['namespace'] }}/{{ ansible_hostname }}.yml"
+    dest: "../inventories/{{ hostvars[inventory_hostname]['namespace'] }}/{{ ansible_nodename }}.yml"
     flat: true
   changed_when: false
   when: inventory_hostname in prometheus_monitored_hosts
