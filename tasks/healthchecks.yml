@@ -80,5 +80,4 @@
   when:
     - inventory_hostname == prometheus_admin_host
     - prometheus_monitored_hosts | length > 1
-  notify: reload prometheus
 ...

@@ -22,12 +22,10 @@
         option: '{{ item.key }}'
         value: '{{ item.value }}'
         backup: true
-      notify: restart prometheus
       with_dict: '{{ prometheus_systemd_limits }}'
 
     - name: "Prometheus: configure"
       include: "configure.yml"
-      notify: reload prometheus
 
     - name: "Prometheus: setup netdata"
       template:
@@ -35,22 +33,21 @@
         dest: "{{ prometheus_conf_dir }}/targets/netdata.yml"
         owner: "{{ prometheus_user }}"
         group: "{{ prometheus_group }}"
-      notify: reload prometheus
   when: inventory_hostname == prometheus_admin_host
 
 - name: "Prometheus: setup healthchecks"
   include: "healthchecks.yml"
-  notify: reload prometheus
+  when: prometheus_blackbox_enabled
 
 - block:
-    - name: "Prometheus: start service"
+    - name: "Prometheus: (re)start service"
       systemd:
-        state: started
+        state: "{{ 'started' if prometheus_provision_only else 'restarted' }}"
         daemon_reload: true
         enabled: true
         name: "prometheus"
 
-    - name: "Prometheus: wait for service to start"
+    - name: "Prometheus: wait for service to be up"
       wait_for:
         host: "{{ prometheus_listen_ip }}"
         port: "{{ prometheus_listen_port }}"

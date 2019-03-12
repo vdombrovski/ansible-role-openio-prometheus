@@ -1,9 +1,7 @@
 ---
 # Global
 prometheus_admin_host: ""
-prometheus_monitored_hosts: []
 prometheus_openio_namespace: OPENIO
-
 prometheus_listen_ip: 0.0.0.0
 prometheus_listen_port: 9090
 prometheus_storage_retention: "10y"
@@ -11,42 +9,9 @@ prometheus_loglevel: info
 prometheus_user: prometheus
 prometheus_group: prometheus
 prometheus_version: 2.2.1
-
-# Directories
 prometheus_storage_path: /var/lib/prometheus/data
 prometheus_conf_dir: /etc/prometheus
-
-# Collection: netdata
-prometheus_netdata_enabled: true
-prometheus_netdata_interval: 10s
-prometheus_netdata_targets: []
-
-# Collection: blackbox
-prometheus_blackbox_interval: 10s
-prometheus_blackbox_zk_port_regex: "^(60)[0-9]+$"
-prometheus_blackbox_port: 9115
-prometheus_blackbox_node_data_iface: eth0
-prometheus_blackbox_node_admin_iface: eth0
-prometheus_blackbox_admin_iface: eth0
-prometheus_blackbox_targets_regenerate: true
-
-# Alert generation
-prometheus_alert_sla_default_medium: 67
-prometheus_alert_sla_levels_medium: {}
-prometheus_alert_instance_default_medium: 67
-prometheus_alert_instance_levels_medium: {}
-
-prometheus_alert_sla_default_high: 34
-prometheus_alert_sla_levels_high: {}
-prometheus_alert_instance_default_high: 34
-prometheus_alert_instance_levels_high: {}
-
-# Alert forwarding
-prometheus_alertmanager_enabled: false
-prometheus_alertmanager_interval: 10s
-prometheus_alertmanager_targets: []
-
-# Limits to set in systemd unit file
+prometheus_provision_only: false
 prometheus_systemd_limits:
   MemoryAccounting: 'true'
   MemoryLimit: '24G'
@@ -56,4 +21,21 @@ prometheus_systemd_limits:
   User: 'prometheus'
   Restart: 'always'
   RestartSec: '2'
+
+# Collection
+prometheus_netdata_enabled: true
+prometheus_blackbox_enabled: true
+prometheus_alertmanager_enabled: true
+
+# Collection: netdata
+prometheus_netdata_interval: 10s
+prometheus_netdata_targets: []
+
+# Collection: blackbox
+prometheus_blackbox_interval: 10s
+prometheus_blackbox_port: 9115
+prometheus_blackbox_node_data_iface: eth0
+prometheus_blackbox_node_admin_iface: eth0
+prometheus_blackbox_admin_iface: eth0
+prometheus_monitored_hosts: []
 ...
