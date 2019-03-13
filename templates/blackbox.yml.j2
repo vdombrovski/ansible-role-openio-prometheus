@@ -72,3 +72,14 @@
         {% endif %}
     {% endfor %}
 {% endfor %}
+
+
+{% if prometheus_oiofs_monitor | default(false) %}
+- labels:
+    module: "oiofs"
+    service: "oiofs"
+  targets:
+    {% for endpoint in prometheus_oiofs_endpoints if endpoint.enabled | default(false) %}
+      - {{ endpoint.id }},{{ tmp_cached_admin_ip }}=>{{ endpoint.addr }}
+    {% endfor %}
+{% endif %}
