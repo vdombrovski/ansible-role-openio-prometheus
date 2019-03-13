@@ -38,4 +38,7 @@ prometheus_blackbox_node_data_iface: eth0
 prometheus_blackbox_node_admin_iface: eth0
 prometheus_blackbox_admin_iface: eth0
 prometheus_monitored_hosts: []
+
+prometheus_oiofs_monitor: false
+prometheus_oiofs_endpoints: []
 ...

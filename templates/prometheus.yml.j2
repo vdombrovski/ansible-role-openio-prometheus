@@ -118,6 +118,13 @@ scrape_configs:
       replacement: http://${1}/info
       target_label: __param_target
 
+    # in: oiofs;10.240.0.23=>10.240.0.24:6999
+    # out: http://10.240.0.24:6999/stats
+    - source_labels: [module, __address__]
+      regex: oiofs;[^=]+=>(.+)
+      replacement: http://${1}/stats
+      target_label: __param_target
+
     # Remove the targets part of the address
     # in: 10.240.0.23=>10.240.0.24:6201
     # out: 10.240.0.23:6115
