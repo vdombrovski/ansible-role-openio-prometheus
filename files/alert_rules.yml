@@ -90,8 +90,8 @@
   severity: "medium"
   tags:
     code: ERROR_SDS_META_CHECK_FAILED
-    host: "instance"
-    service: "service"
+    host: "host"
+    service: "instance"
   details: >-
     An instance of '{{$labels.service}}' on the node '{{$labels.host}}' is failing to respond to healthcheck.
   solutions: >-
@@ -110,7 +110,7 @@
   tags:
     code: ERROR_SDS_RAWX_CHECK_FAILED
     host: "host"
-    service: "service"
+    service: "instance"
   details: >-
     An instance of a RAWX service on the node '{{ $labels.host }}' located at '{{ $labels.service }}' is not responding
     to the healthcheck.
@@ -124,6 +124,40 @@
     If you are not able to determine the issue, please contact the OpenIO support.
     The alert will be resolved once the rawx instance '{{ $labels.service }}'
     is marked as up in `openio cluster list` and is scored.
+
+- name: "Redis backend malfunction"
+  duration: 60s
+  query: "probe_success{job=~'redis|redissentinel'} == 0"
+  severity: "medium"
+  tags:
+    code: ERROR_SDS_REDIS_CHECK_FAILED
+    host: "host"
+    service: "instance"
+  details: >-
+    An redis related instance on '{{ $labels.host }}' located at '{{ $labels.service }}' is not responding
+    to the healthcheck.
+    This can cause server errors and must be investigated.
+  solutions: >-
+    Start by checking that the instance is up by running <code>gridinit_cmd status</code> on '{{ $labels.host }}'.
+    If the instance is broken, consult the logs of the service located in /var/log/oio/sds/.
+    Check that the underlying storage device is functional. If the problem persists, please contact the OpenIO support.
+    The alert will be resolved once all redis/redissentinel services are up and running.
+
+- name: "Account service malfunction"
+  duration: 30s
+  query: "(count(probe_success{job='account'} == 1) == 0) or sum(netdata_openio_score__average{service='account'}) == 0"
+  severity: "medium"
+  tags:
+    code: ERROR_SDS_ACCOUNT_CHECK_FAILED
+  details: >-
+    The account service is experiencing issues that could cause SLA degradation and server errors.
+  solutions: >-
+    Start by checking the status of all account services by running <code>openio cluster list account</code>.
+    If you have instances marked as 'False' try repairing them by running <code>gridinit_cmd repair @account</code>
+    on the corresponding nodes. Consult the logs at /var/log/oio/sds/ for errors. If you have instances scored at 0,
+    run <code>openio cluster unlockall account</code> and check again to make sure that the score is rising.
+    If the issue persists, please contact the OpenIO support.
+    The alert will be resolved once there is at least one account instance running and scored on the cluster.
 
 - name: "Metric collection failure"
   duration: 60s
