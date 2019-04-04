@@ -51,6 +51,12 @@ This role deploys a Prometheus setup, specifically tuned for the monitoring of O
 | prometheus_blackbox_node_data_iface  | OpenIO Network interface of the health checked nodes (on which OpenIO services listen)  | string  |
 | prometheus_monitored_hosts           | List of hostnames of all healthchecked hosts                                            | list    |
 
+#### Collection: alertmanager
+| Variable                     | Description              | Type    |
+| ---------------------------- | ------------------------ | ------- |
+| prometheus_alertmanager_host | Alertmanager listen ip   | string  |
+| prometheus_alertmanager_port | Alertmanager listen port | integer |
+
 ### Examples
 
 See docker-tests branch.

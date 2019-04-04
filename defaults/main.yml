@@ -41,4 +41,8 @@ prometheus_monitored_hosts: []
 
 prometheus_oiofs_monitor: false
 prometheus_oiofs_endpoints: []
+
+# Collection: alertmanager
+prometheus_alertmanager_host: localhost
+prometheus_alertmanager_port: 9093
 ...
