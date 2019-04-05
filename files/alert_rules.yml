@@ -172,7 +172,7 @@
     This prevents monitoring from working properly and must be resolved.
   solutions: >-
     Check the state of the service by running
-    <code>systemctl status {{ if eq $labels.service "blackbox" }}blackbox_exporter{{ else }}netdata{{endif}}.
+    <code>systemctl status {{ if eq $labels.service "blackbox" }}blackbox_exporter{{ else }}netdata{{ end }}.
     If the service isn't started, start and enable it. If the service fails to start, contact the OpenIO support.
     Check that the service is reachable, if not, make sure ports 19999 and 9115 are open.
     You can test the availability by doing a HTTP GET request on the IP/port of the service.
