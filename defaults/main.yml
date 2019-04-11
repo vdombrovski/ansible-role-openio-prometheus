@@ -12,6 +12,7 @@ prometheus_version: 2.2.1
 prometheus_storage_path: /var/lib/prometheus/data
 prometheus_conf_dir: /etc/prometheus
 prometheus_provision_only: false
+prometheus_systemd_enabled: true
 prometheus_systemd_limits:
   MemoryAccounting: 'true'
   MemoryLimit: '24G'

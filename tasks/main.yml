@@ -44,7 +44,7 @@
       systemd:
         state: "{{ 'started' if prometheus_provision_only else 'restarted' }}"
         daemon_reload: true
-        enabled: true
+        enabled: "{{ prometheus_systemd_enabled }}"
         name: "prometheus"
 
     - name: "Prometheus: wait for service to be up"

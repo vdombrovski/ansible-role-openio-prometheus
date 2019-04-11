@@ -16,6 +16,7 @@ This role deploys a Prometheus setup, specifically tuned for the monitoring of O
 | Variable                     | Description                                | Type    |
 | ---------------------------- | ------------------------------------------ | ------- |
 | prometheus_admin_host        | Hostname of admin machine                  | string  |
+| prometheus_systemd_enabled   | Enable service at boot                     | boolean |
 | prometheus_systemd_limits    | Limits to setup in systemd unit file       | dict    |
 | prometheus_listen_ip         | IP address on which Prometheus will listen | string  |
 | prometheus_listen_port       | Port on which Prometheus will listen       | integer |
