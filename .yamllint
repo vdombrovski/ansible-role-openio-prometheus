@@ -1,6 +1,7 @@
 ---
 ignore:
   env/**/*
+  .travis*
 rules:
   braces:
     level: error

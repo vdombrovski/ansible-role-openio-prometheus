@@ -17,7 +17,7 @@ scrape_configs:
   scrape_interval: 10s
   scrape_timeout:  10s
   static_configs:
-    - targets: ['{{ prometheus_listen_ip }}:{{ prometheus_listen_port }}']
+    - targets: ['{{ prometheus_bind_address }}:{{ prometheus_bind_port }}']
 
 {% if prometheus_netdata_enabled -%}
 - job_name: netdata
@@ -161,6 +161,5 @@ scrape_configs:
 alerting:
   alertmanagers:
   - static_configs:
-    - targets:
-      - {{ prometheus_alertmanager_host }}:{{ prometheus_alertmanager_port }}
+    - targets: ['{{ prometheus_bind_address }}:{{ prometheus_alertmanager_port }}']
 {% endif %}

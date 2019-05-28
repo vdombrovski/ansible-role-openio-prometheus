@@ -1,0 +1,20 @@
+# Test playbook
+---
+- hosts: all
+  become: true
+  vars:
+    namespace: TRAVIS
+  pre_tasks:
+    - name: Seed directory for NS
+      file:
+        path: "/etc/oio/sds/{{ namespace }}"
+        state: directory
+    - name: Seed inventory on nodes
+      copy:
+        src: inventory.yml
+        dest: "/etc/oio/sds/{{ namespace }}/inventory.yml"
+  roles:
+    - role: role_under_test
+      prometheus_admin_hosts: [ 'localhost' ]
+      prometheus_monitored_hosts: [ 'localhost' ]
+...

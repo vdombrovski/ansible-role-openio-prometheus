@@ -7,14 +7,7 @@
       - blackbox_iface_node_admin: true
       - blackbox_iface_admin: true
       - inventory_file: true
-      - admin_host: true
       - monitored_hosts: true
-
-- name: Preflight > check that the admin host is defined
-  set_fact:
-    prometheus_checks: "{{ prometheus_checks | combine({'admin_host': false}) }}"
-  when:
-    - not prometheus_admin_host
 
 - name: Preflight > check that at least one monitored host is defined
   set_fact:
@@ -52,7 +45,7 @@
     prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_admin': false}) }}"
   when:
     - prometheus_blackbox_enabled
-    - inventory_hostname == prometheus_admin_host
+    - inventory_hostname in prometheus_admin_hosts
     - ('ansible_' + prometheus_blackbox_admin_iface) is not defined
 
 - name: Perform a stat on the inventory file

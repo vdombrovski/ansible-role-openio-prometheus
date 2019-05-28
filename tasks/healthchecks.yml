@@ -6,6 +6,7 @@
     tmp_cached_inventories: {}
     tmp_cached_inventory: {}
     tmp_cached_hostnames: {}
+    tmp_cached_oiofs_endpoints: {}
     tmp_cached_namespace: ""
 
 - name: "Register IP of monitored node"
@@ -20,13 +21,20 @@
   set_fact:
     prometheus_admin_ip: "\
       {{ hostvars[inventory_hostname]['ansible_'+prometheus_blackbox_admin_iface]['ipv4']['address'] }}"
-  when: inventory_hostname == prometheus_admin_host
+  when: inventory_hostname in prometheus_admin_hosts
 
 - name: Cache hostnames
   set_fact:
     tmp_cached_hostnames: "{{ tmp_cached_hostnames | combine({item: hostvars[item]['ansible_nodename']}) }}"
   with_items: "{{ prometheus_monitored_hosts }}"
-  when: inventory_hostname == prometheus_admin_host
+  when: inventory_hostname in prometheus_admin_hosts
+
+- name: Cache oiofs endpoints
+  set_fact:
+    tmp_cached_oiofs_endpoints: "{{ tmp_cached_oiofs_endpoints | combine(
+{hostvars[item]['ansible_nodename']: hostvars[item]['oiofs_mountpoints']}) }}"
+  with_items: "{{ prometheus_oiofs_hosts }}"
+  when: inventory_hostname in prometheus_admin_hosts
 
 - name: Cache host data
   set_fact:
@@ -37,18 +45,18 @@
     tmp_cached_inventories: "{{ tmp_cached_inventories | combine({item.value: 'inventory-' + item.key }) }}"
   with_dict:
     - "{{ tmp_cached_hostnames }}"
-  when: inventory_hostname == prometheus_admin_host
+  when: inventory_hostname in prometheus_admin_hosts
 
 - name: "Cache admin IP and 'namespace' (for Jinja2)"
   set_fact:
     tmp_cached_admin_ip: "{{ prometheus_admin_ip }}"
-    tmp_cached_namespace: "{{ hostvars[prometheus_monitored_hosts[0]]['namespace'] }}"
-  when: inventory_hostname == prometheus_admin_host
+    tmp_cached_namespace: "{{ prometheus_openio_namespace }}"
+  when: inventory_hostname in prometheus_admin_hosts
 
 - name: "Fetch inventories"
   fetch:
-    src: "/etc/oio/sds/{{ hostvars[inventory_hostname]['namespace'] }}/inventory.yml"
-    dest: "../inventories/{{ hostvars[inventory_hostname]['namespace'] }}/{{ ansible_nodename }}.yml"
+    src: "/etc/oio/sds/{{ prometheus_openio_namespace }}/inventory.yml"
+    dest: "../inventories/{{ prometheus_openio_namespace }}/{{ ansible_nodename }}.yml"
     flat: true
   changed_when: false
   when: inventory_hostname in prometheus_monitored_hosts
@@ -60,16 +68,16 @@
   with_dict: "{{ tmp_cached_inventories }}"
   when:
     - not ansible_check_mode
-    - inventory_hostname == prometheus_admin_host
+    - inventory_hostname in prometheus_admin_hosts
 
 - name: "Consolidate inventories into single dict"
   set_fact:
     tmp_cached_inventory: "{{ tmp_cached_inventory |\
-      combine({item.key: hostvars[prometheus_admin_host][item.value]}) }}"
+      combine({item.key: hostvars[inventory_hostname][item.value]}) }}"
   with_dict: "{{ tmp_cached_inventories }}"
   when:
     - not ansible_check_mode
-    - inventory_hostname == prometheus_admin_host
+    - inventory_hostname in prometheus_admin_hosts
 
 - name: "Generate healthchecks"
   template:
@@ -78,6 +86,7 @@
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
   when:
-    - inventory_hostname == prometheus_admin_host
+    - inventory_hostname in prometheus_admin_hosts
     - prometheus_monitored_hosts | length > 1
+  register: _prometheus_healthchecks
 ...

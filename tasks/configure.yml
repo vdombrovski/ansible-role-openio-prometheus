@@ -13,6 +13,7 @@
     - "{{ prometheus_storage_path }}"
   loop_control:
     loop_var: dirname
+  register: _prometheus_dirs
 
 - name: "Setup recording rules"
   template:
@@ -21,11 +22,13 @@
     validate: "{{ promtool_check_rules_cmd }} %s"
   with_items:
     - "{{ prometheus_aggregation_rules }}"
+  register: _prometheus_aggr
 
 - name: "Setup alerting rules"
   copy:
     content: "{{ lookup('file', 'alert_rules.yml') | format_alerts }}"
     dest: "/etc/prometheus/alerts/default.rules"
+  register: _prometheus_alerts
 
 - name: "Setup prometheus config yml"
   template:
@@ -34,6 +37,7 @@
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     validate: "{{ promtool_check_config_cmd }} %s"
+  register: _prometheus_conf
 
 - name: "Create prometheus run options"
   set_fact:
@@ -42,8 +46,8 @@
       storage.tsdb.path: "{{ prometheus_storage_path }}"
       storage.tsdb.retention: "{{ prometheus_storage_retention }}"
       web.enable-lifecycle: ""
-      web.listen-address: "{{ prometheus_listen_ip }}:{{ prometheus_listen_port }}"
-      web.external-url: "http://{{ prometheus_listen_ip }}:{{ prometheus_listen_port }}"
+      web.listen-address: "{{ prometheus_bind_address }}:{{ prometheus_bind_port }}"
+      web.external-url: "http://{{ prometheus_bind_address }}:{{ prometheus_bind_port }}"
       log.level: "{{ prometheus_loglevel }}"
 
 - name: Save Prometheus run options
@@ -52,4 +56,5 @@
     dest: "/etc/default/prometheus"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
+  register: _prometheus_defaults
 ...

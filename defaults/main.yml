@@ -1,10 +1,11 @@
 ---
 # Global
-prometheus_admin_host: ""
-prometheus_openio_namespace: OPENIO
-prometheus_listen_ip: 0.0.0.0
-prometheus_listen_port: 9090
-prometheus_storage_retention: "10y"
+
+prometheus_openio_namespace: "{{ namespace | d('OPENIO') }}"
+prometheus_bind_interface: "{{ openio_bind_mgmt_interface | d(ansible_default_ipv4.alias) }}"
+prometheus_bind_address: "{{ openio_bind_mgmt_address | d(ansible_default_ipv4.address) }}"
+prometheus_bind_port: 9090
+prometheus_storage_retention: "30d"
 prometheus_loglevel: info
 prometheus_user: prometheus
 prometheus_group: prometheus
@@ -28,22 +29,26 @@ prometheus_netdata_enabled: true
 prometheus_blackbox_enabled: true
 prometheus_alertmanager_enabled: true
 
+prometheus_admin_hosts: "{{ groups['admin'] | d([]) }}"
+prometheus_oiofs_hosts: "{{ (groups['oiofs'] | d([]) + groups['oiofs_ha'] | d([])) | unique }}"
+prometheus_monitored_hosts: "{{ groups['fronts'] | d([]) + groups['backs'] | d([]) + prometheus_oiofs_hosts | unique }}"
+
 # Collection: netdata
 prometheus_netdata_interval: 10s
-prometheus_netdata_targets: []
+prometheus_netdata_port: 19999
+prometheus_netdata_hosts: "{{ (prometheus_monitored_hosts + prometheus_oiofs_hosts) | d([]) | unique }}"
+prometheus_netdata_targets: "[{% for host in prometheus_netdata_hosts -%}
+\"{{ hostvars[host].openio_bind_mgmt_address | d('localhost')
++ ':' + (prometheus_netdata_port | string) }}\"{% if not loop.last %},{% endif %}
+{%- endfor %}]"
 
 # Collection: blackbox
 prometheus_blackbox_interval: 10s
 prometheus_blackbox_port: 9115
-prometheus_blackbox_node_data_iface: eth0
-prometheus_blackbox_node_admin_iface: eth0
-prometheus_blackbox_admin_iface: eth0
-prometheus_monitored_hosts: []
-
-prometheus_oiofs_monitor: false
-prometheus_oiofs_endpoints: []
+prometheus_blackbox_node_data_iface: "{{ openio_bind_interface | d(ansible_default_ipv4.alias) }}"
+prometheus_blackbox_node_admin_iface: "{{ openio_bind_mgmt_interface | d(ansible_default_ipv4.alias) }}"
+prometheus_blackbox_admin_iface: "{{ openio_bind_mgmt_interface | d(ansible_default_ipv4.alias) }}"
 
 # Collection: alertmanager
-prometheus_alertmanager_host: localhost
 prometheus_alertmanager_port: 9093
 ...

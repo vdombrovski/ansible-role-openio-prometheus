@@ -33,7 +33,8 @@
         dest: "{{ prometheus_conf_dir }}/targets/netdata.yml"
         owner: "{{ prometheus_user }}"
         group: "{{ prometheus_group }}"
-  when: inventory_hostname == prometheus_admin_host
+      register: _netdata_conf
+  when: inventory_hostname in prometheus_admin_hosts
 
 - name: "Prometheus: setup healthchecks"
   include: "healthchecks.yml"
@@ -49,8 +50,11 @@
 
     - name: "Prometheus: wait for service to be up"
       wait_for:
-        host: "{{ prometheus_listen_ip }}"
-        port: "{{ prometheus_listen_port }}"
+        host: "{{ prometheus_bind_address }}"
+        port: "{{ prometheus_bind_port }}"
         delay: 10
-  when: inventory_hostname == prometheus_admin_host
+  when:
+    - inventory_hostname in prometheus_admin_hosts
+    - _netdata_conf is changed or _prometheus_conf is changed or _prometheus_defaults is changed
+     or _prometheus_dirs is changed or _prometheus_aggr is changed or _prometheus_healthchecks is changed
 ...

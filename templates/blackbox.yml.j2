@@ -27,20 +27,12 @@
 - labels:
     module: blackbox
   targets:
-    - {{ prometheus_admin_host }},{{ tmp_cached_admin_ip }}=>{{ tmp_cached_admin_ip }}:{{ prometheus_blackbox_port }}
+    - {{ ansible_nodename }},{{ tmp_cached_admin_ip }}=>{{ tmp_cached_admin_ip }}:{{ prometheus_blackbox_port }}
     {% for hostname, data in tmp_cached_inventory.iteritems() %}
     - {{ hostname }},{{ tmp_cached_node_data_ip[hostname] }}=>{{ tmp_cached_node_data_ip[hostname] }}:{{ prometheus_blackbox_port }}
     {% endfor %}
 
 {% for svc in prometheus_oioping_services %}
-- labels:
-    module: blackbox
-  targets:
-    - {{ prometheus_admin_host }},{{ tmp_cached_admin_ip }}=>{{ tmp_cached_admin_ip }}:{{ prometheus_blackbox_port }}
-    {% for hostname, data in tmp_cached_inventory.iteritems() %}
-    - {{ hostname }},{{ tmp_cached_node_data_ip[hostname] }}=>{{ tmp_cached_node_data_ip[hostname] }}:{{ prometheus_blackbox_port }}
-    {% endfor %}
-
 - labels:
     module: oioping
     service: "{{ svc }}"
@@ -74,12 +66,14 @@
 {% endfor %}
 
 
-{% if prometheus_oiofs_monitor | default(false) %}
+{% if tmp_cached_oiofs_endpoints | length %}
 - labels:
     module: "oiofs"
     service: "oiofs"
   targets:
-    {% for endpoint in prometheus_oiofs_endpoints if endpoint.enabled | default(false) %}
-      - {{ endpoint.id }},{{ tmp_cached_admin_ip }}=>{{ endpoint.addr }}
+    {% for node, endpoints in tmp_cached_oiofs_endpoints.iteritems() %}
+      {% for ep in endpoints %}
+      - {{ node + '-' + ep.path | d(ep.namespace | d('') + '-' + ep.account | d('') + '-' + ep.container | d('')) }},{{ tmp_cached_node_admin_ip[node] }}=>{{ ep.http_server }}
+      {% endfor %}
     {% endfor %}
 {% endif %}
