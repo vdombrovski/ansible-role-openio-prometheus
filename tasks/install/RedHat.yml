@@ -6,6 +6,7 @@
     baseurl: https://packagecloud.io/prometheus-rpm/release/el/7/$basearch
     gpgkey: https://packagecloud.io/prometheus-rpm/release/gpgkey
     gpgcheck: 0
+  when: prometheus_upstream_package_repository
 
 - name: Install
   yum:

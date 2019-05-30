@@ -8,7 +8,9 @@
   apt_repository:
     repo: deb https://packagecloud.io/prometheus-deb/release/ubuntu/ xenial main
     state: present
-  when: ansible_distribution_release == 'xenial'
+  when:
+    - ansible_distribution_release == 'xenial'
+    - prometheus_upstream_package_repository
 
 - name: Add Key
   apt_key:

@@ -10,6 +10,7 @@ prometheus_loglevel: info
 prometheus_user: prometheus
 prometheus_group: prometheus
 prometheus_version: 2.2.1
+prometheus_upstream_package_repository: false
 prometheus_storage_path: /var/lib/prometheus/data
 prometheus_conf_dir: /etc/prometheus
 prometheus_provision_only: false

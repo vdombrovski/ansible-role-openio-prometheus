@@ -14,6 +14,9 @@
         src: inventory.yml
         dest: "/etc/oio/sds/{{ namespace }}/inventory.yml"
   roles:
+    - role: repo
+      openio_repository_no_log: false
+      openio_repository_mirror_host: mirror2.openio.io
     - role: role_under_test
       prometheus_admin_hosts: [ 'localhost' ]
       prometheus_monitored_hosts: [ 'localhost' ]
