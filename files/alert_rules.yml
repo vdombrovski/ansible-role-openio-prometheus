@@ -54,13 +54,13 @@
 
 - name: "Server errors (5xx) detected"
   duration: 10m
-  query: "netdata_web_log_response_codes_requests_persec_average{dimension='5xx'} > 0"
+  query: "label_replace(netdata_web_log_response_codes_requests_persec_average{dimension='5xx'}, 'service', '$1/$2/$3',
+  'chart', 'web_log_\\\\.openio\\\\.(.*?)\\\\.(.*?)\\\\.(.*?)\\\\.log.*') > 0"
   severity: "medium"
   tags:
     code: ERROR_SDS_HTTP_5XX_ERR
     host: "instance"
-    service: "label_replace(netdata_web_log_response_codes_requests_persec_average{dimension='5xx'},
-     'service', '$1/$2/$3', 'chart', 'web_log_.openio.(.*?)\\.(.*?)\\.(.*?)\\.log.*')"
+    service: "service"
   details: >-
     The service '{{$labels.service}}' on node '{{$labels.host}}' is emitting server errors.
   solutions: >-
