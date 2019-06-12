@@ -104,7 +104,7 @@ start_container() {
   set -x
   docker run --detach \
     "${run_opts[@]}" \
-    --volume="${PWD}:${role_dir}:rw" \
+    --volume="${PWD}:${role_dir}:ro" \
     -e IPVAGRANT=${IPVAGRANT:=""} \
     -e USR=${USR:=""} \
     -e PASS=${PASS:=""} \

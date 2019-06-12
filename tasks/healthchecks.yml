@@ -53,27 +53,27 @@
     tmp_cached_namespace: "{{ prometheus_openio_namespace }}"
   when: inventory_hostname in prometheus_admin_hosts
 
+- name: Create temporary inventory directory
+  local_action:
+    module: tempfile
+    state: directory
+    suffix: inventory
+  register: inv_dir
+  run_once: true
+  changed_when: false
+
 - name: "Fetch inventories"
   fetch:
     src: "/etc/oio/sds/{{ prometheus_openio_namespace }}/inventory.yml"
-    dest: "../inventories/{{ prometheus_openio_namespace }}/{{ ansible_nodename }}.yml"
+    dest: "{{ inv_dir.path }}/{{ prometheus_openio_namespace }}/{{ ansible_nodename }}.yml"
     flat: true
   changed_when: false
   when: inventory_hostname in prometheus_monitored_hosts
 
 - name: "Load inventories as facts"
   include_vars:
-    file: "../inventories/{{ tmp_cached_namespace }}/{{ item.key }}.yml"
+    file: "{{ inv_dir.path }}/{{ tmp_cached_namespace }}/{{ item.key }}.yml"
     name: "{{ item.value }}"
-  with_dict: "{{ tmp_cached_inventories }}"
-  when:
-    - not ansible_check_mode
-    - inventory_hostname in prometheus_admin_hosts
-
-- name: "Consolidate inventories into single dict"
-  set_fact:
-    tmp_cached_inventory: "{{ tmp_cached_inventory |\
-      combine({item.key: hostvars[inventory_hostname][item.value]}) }}"
   with_dict: "{{ tmp_cached_inventories }}"
   when:
     - not ansible_check_mode

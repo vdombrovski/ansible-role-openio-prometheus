@@ -31,12 +31,8 @@ before_install:
   # - git worktree add docker-tests origin/docker-tests
   # retrieve centralized script
   - |
-    for i in functional-tests.sh ansible.cfg; do
+    for i in functional-tests.sh ansible.cfg docker-tests.sh; do
       wget -O docker-tests/${i} https://raw.githubusercontent.com/open-io/ansible-role-openio-skeleton/docker-tests/${i}
-    done
-    for i in docker-tests.sh; do
-      wget -O docker-tests/${i} \
-        https://raw.githubusercontent.com/open-io/ansible-role-openio-prometheus/docker-tests/${i}
     done
   # Lint
   - sudo pip install --upgrade pip
