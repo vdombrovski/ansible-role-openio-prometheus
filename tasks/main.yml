@@ -2,10 +2,14 @@
 
 - name: "Prometheus: checks"
   include: preflight.yml
+  tags:
+    - install
+    - configure
 
 - block:
     - name: "Prometheus: install"
       include: "install/{{ ansible_distribution }}.yml"
+      tags: install
 
     - name: 'Prometheus: Create systemd service configuration directory'
       file:
@@ -14,6 +18,7 @@
         owner: root
         group: root
         mode: 0755
+      tags: configure
 
     - name: "Prometheus: configure systemd service limits"
       ini_file:
@@ -23,9 +28,11 @@
         value: '{{ item.value }}'
         backup: true
       with_dict: '{{ prometheus_systemd_limits }}'
+      tags: configure
 
     - name: "Prometheus: configure"
       include: "configure.yml"
+      tags: configure
 
     - name: "Prometheus: setup netdata"
       template:
@@ -34,11 +41,13 @@
         owner: "{{ prometheus_user }}"
         group: "{{ prometheus_group }}"
       register: _netdata_conf
+      tags: configure
   when: inventory_hostname in prometheus_admin_hosts
 
 - name: "Prometheus: setup healthchecks"
   include: "healthchecks.yml"
   when: prometheus_blackbox_enabled
+  tags: configure
 
 - block:
     - name: "Prometheus: (re)start service"
@@ -47,12 +56,14 @@
         daemon_reload: true
         enabled: "{{ prometheus_systemd_enabled }}"
         name: "prometheus"
+      tags: configure
 
     - name: "Prometheus: wait for service to be up"
       wait_for:
         host: "{{ prometheus_bind_address }}"
         port: "{{ prometheus_bind_port }}"
         delay: 10
+      tags: configure
   when:
     - inventory_hostname in prometheus_admin_hosts
     - _netdata_conf is changed or _prometheus_conf is changed or _prometheus_defaults is changed

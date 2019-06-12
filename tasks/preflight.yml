@@ -8,6 +8,7 @@
       - blackbox_iface_admin: true
       - inventory_file: true
       - monitored_hosts: true
+  tags: configure
 
 - name: Preflight > check that at least one monitored host is defined
   set_fact:
@@ -15,6 +16,7 @@
   when:
     - prometheus_blackbox_enabled
     - prometheus_monitored_hosts | length == 0
+  tags: configure
 
 - name: Preflight > check distro
   set_fact:
@@ -23,6 +25,7 @@
     - ansible_distribution == item.distro
     - ansible_distribution_major_version == item.version | string
   with_items: "{{ prometheus_valid_distros }}"
+  tags: configure
 
 - name: Preflight > check blackbox interface on nodes (data)
   set_fact:
@@ -31,6 +34,7 @@
     - prometheus_blackbox_enabled
     - inventory_hostname in prometheus_monitored_hosts
     - ('ansible_' + prometheus_blackbox_node_data_iface) is not defined
+  tags: configure
 
 - name: Preflight > check blackbox interface on nodes (admin)
   set_fact:
@@ -39,6 +43,7 @@
     - prometheus_blackbox_enabled
     - inventory_hostname in prometheus_monitored_hosts
     - ('ansible_' + prometheus_blackbox_node_admin_iface) is not defined
+  tags: configure
 
 - name: Preflight > check blackbox interface on admin
   set_fact:
@@ -47,6 +52,7 @@
     - prometheus_blackbox_enabled
     - inventory_hostname in prometheus_admin_hosts
     - ('ansible_' + prometheus_blackbox_admin_iface) is not defined
+  tags: configure
 
 - name: Perform a stat on the inventory file
   stat:
@@ -55,6 +61,7 @@
   when:
     - prometheus_blackbox_enabled
     - inventory_hostname in prometheus_monitored_hosts
+  tags: configure
 
 - name: Preflight > check that all nodes have an inventory.yml file
   set_fact:
@@ -64,6 +71,7 @@
     - inventory_hostname in prometheus_monitored_hosts
     - not inventory_file.stat.exists
     - not ansible_check_mode
+  tags: configure
 
 # Keep this part at the end
 - name: Fail on failed checks
@@ -71,4 +79,5 @@
     msg: "Check failed: {{ item.key }}"
   when: not item.value
   with_dict: "{{ prometheus_checks }}"
+  tags: configure
 ...

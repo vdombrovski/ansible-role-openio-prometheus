@@ -3,6 +3,7 @@
   apt:
     name: apt-transport-https
     state: present
+  tags: install
 
 - name: Add repository
   apt_repository:
@@ -10,12 +11,14 @@
     state: present
   when:
     - ansible_distribution_release == 'xenial'
+  tags: install
 
 - name: Add Key
   apt_key:
     url: https://packagecloud.io/prometheus-deb/release/gpgkey
     state: present
   when: ansible_distribution_release == 'xenial'
+  tags: install
 
 - name: Install
   apt:
@@ -28,6 +31,7 @@
   retries: 5
   delay: 2
   ignore_errors: "{{ ansible_check_mode }}"
+  tags: install
 
 - name: Install
   apt:
@@ -38,4 +42,5 @@
   retries: 5
   delay: 2
   ignore_errors: "{{ ansible_check_mode }}"
+  tags: install
 ...

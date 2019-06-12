@@ -8,6 +8,7 @@
     tmp_cached_hostnames: {}
     tmp_cached_oiofs_endpoints: {}
     tmp_cached_namespace: ""
+  tags: configure
 
 - name: "Register IP of monitored node"
   set_fact:
@@ -16,18 +17,21 @@
     prometheus_node_admin_ip: "\
       {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_admin_iface]['ipv4']['address'] }}"
   when: inventory_hostname in prometheus_monitored_hosts
+  tags: configure
 
 - name: "Register IP of admin node"
   set_fact:
     prometheus_admin_ip: "\
       {{ hostvars[inventory_hostname]['ansible_'+prometheus_blackbox_admin_iface]['ipv4']['address'] }}"
   when: inventory_hostname in prometheus_admin_hosts
+  tags: configure
 
 - name: Cache hostnames
   set_fact:
     tmp_cached_hostnames: "{{ tmp_cached_hostnames | combine({item: hostvars[item]['ansible_nodename']}) }}"
   with_items: "{{ prometheus_monitored_hosts }}"
   when: inventory_hostname in prometheus_admin_hosts
+  tags: configure
 
 - name: Cache oiofs endpoints
   set_fact:
@@ -35,6 +39,7 @@
 {hostvars[item]['ansible_nodename']: hostvars[item]['oiofs_mountpoints']}) }}"
   with_items: "{{ prometheus_oiofs_hosts }}"
   when: inventory_hostname in prometheus_admin_hosts
+  tags: configure
 
 - name: Cache host data
   set_fact:
@@ -46,6 +51,7 @@
   with_dict:
     - "{{ tmp_cached_hostnames }}"
   when: inventory_hostname in prometheus_admin_hosts
+  tags: configure
 
 - name: "Cache admin IP and 'namespace' (for Jinja2)"
   set_fact:
@@ -61,6 +67,7 @@
   register: inv_dir
   run_once: true
   changed_when: false
+  tags: configure
 
 - name: "Fetch inventories"
   fetch:
@@ -69,6 +76,7 @@
     flat: true
   changed_when: false
   when: inventory_hostname in prometheus_monitored_hosts
+  tags: configure
 
 - name: "Load inventories as facts"
   include_vars:
@@ -78,6 +86,7 @@
   when:
     - not ansible_check_mode
     - inventory_hostname in prometheus_admin_hosts
+  tags: configure
 
 - name: "Generate healthchecks"
   template:
@@ -89,4 +98,5 @@
     - inventory_hostname in prometheus_admin_hosts
     - prometheus_monitored_hosts | length > 1
   register: _prometheus_healthchecks
+  tags: configure
 ...
