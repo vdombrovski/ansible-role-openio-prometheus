@@ -10,7 +10,6 @@
     state: present
   when:
     - ansible_distribution_release == 'xenial'
-    - prometheus_upstream_package_repository
 
 - name: Add Key
   apt_key:
