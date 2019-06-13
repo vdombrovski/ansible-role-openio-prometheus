@@ -68,6 +68,7 @@
   run_once: true
   changed_when: false
   tags: configure
+  become: false
 
 - name: "Fetch inventories"
   fetch:
