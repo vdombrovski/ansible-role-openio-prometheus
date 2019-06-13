@@ -89,6 +89,15 @@
     - inventory_hostname in prometheus_admin_hosts
   tags: configure
 
+- name: "Consolidate inventories into single dict"
+  set_fact:
+    tmp_cached_inventory: "{{ tmp_cached_inventory |\
+      combine({item.key: hostvars[inventory_hostname][item.value]}) }}"
+  with_dict: "{{ tmp_cached_inventories }}"
+  when:
+    - not ansible_check_mode
+    - inventory_hostname in prometheus_admin_hosts
+
 - name: "Generate healthchecks"
   template:
     src: blackbox.yml.j2
