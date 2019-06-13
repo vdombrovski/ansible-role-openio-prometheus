@@ -38,7 +38,7 @@ prometheus_netdata_interval: 10s
 prometheus_netdata_port: 19999
 prometheus_netdata_hosts: "{{ (prometheus_monitored_hosts + prometheus_oiofs_hosts) | d([]) | unique }}"
 prometheus_netdata_targets: "[{% for host in prometheus_netdata_hosts -%}
-\"{{ hostvars[host].openio_bind_mgmt_address | d('localhost')
+\"{{ hostvars[host].openio_bind_mgmt_address | d(hostvars[host].openio_bind_address | d('localhost'))
 + ':' + (prometheus_netdata_port | string) }}\"{% if not loop.last %},{% endif %}
 {%- endfor %}]"
 
