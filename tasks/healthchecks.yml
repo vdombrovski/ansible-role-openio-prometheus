@@ -69,6 +69,16 @@
   changed_when: false
   tags: configure
 
+- name: Make temporary directory writeable
+  local_action:
+    module: file
+    path: "{{ inv_dir.path }}"
+    owner: root
+    group: root
+    mode: '0777'
+  changed_when: false
+  tags: configure
+
 - name: "Fetch inventories"
   fetch:
     src: "/etc/oio/sds/{{ prometheus_openio_namespace }}/inventory.yml"
