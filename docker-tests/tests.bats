@@ -32,3 +32,17 @@
   echo "output: "$output
   [[ "${status}" -eq "0" ]]
 }
+
+@test 'Healthchecks for services defined in inventory are set up' {
+    run bash -c "docker exec -ti ${SUT_ID} grep '=>10.0.0.91:6006' /etc/prometheus/targets/blackbox.yml"
+    echo "output: "$output
+    [[ "${status}" -eq "0" ]]
+
+    run bash -c "docker exec -ti ${SUT_ID} grep '=>10.0.0.91:6000' /etc/prometheus/targets/blackbox.yml"
+    echo "output: "$output
+    [[ "${status}" -eq "0" ]]
+
+    run bash -c "docker exec -ti ${SUT_ID} grep '=>10.0.0.91:6137' /etc/prometheus/targets/blackbox.yml"
+    echo "output: "$output
+    [[ "${status}" -eq "0" ]]
+}
