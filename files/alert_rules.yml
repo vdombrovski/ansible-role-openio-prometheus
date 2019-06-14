@@ -1,180 +1,199 @@
 ---
-- name: "Unreachable node"
-  duration: 5m
-  query: "probe_success{job='icmpcheck'} == 0"
-  severity: "medium"
-  tags:
-    code: ERROR_SYS_HOST_DOWN
-    host: "host"
-  details: >-
-    The server '{{$labels.host}}' can't be reached by the admin machine.
-  solutions: >-
-    First check that you can reach the node by other means (ssh). Your firewall configuration may also prevent
-    the server from being reachable.
-    If your host has been rebooted, make sure that all services are running by using <code>gridinit_cmd status</code>.
-    Host downtime may cause services to be given a score of 0.
-    In this case, please refer to the score alert procedures.
-    The alert will be resolved once the node is joinable via ICMP.
+groups:
+  - name: default
+    rules:
+      - alert: UnreachableNode
+        expr: probe_success{job='icmpcheck'} == 0
+        for: 5m
+        labels:
+          severity: medium
+        annotations:
+          summary: Unreachable node
+          description: >-
+            The server '{{ $labels.host }}' can't be reached by the admin machine.
+          solutions: >-
+            First check that you can reach the node by other means (ssh). Your firewall configuration may also prevent
+            the server from being reachable.
+            If your host has been rebooted,
+            make sure that all services are running by using <code>gridinit_cmd status</code>.
+            Host downtime may cause services to be given a score of 0.
+            In this case, please refer to the score alert procedures.
+            The alert will be resolved once the node is joinable via ICMP.
 
-- name: "RAM approaching limit"
-  duration: 5m
-  query: "9 * sum(netdata_system_ram_MB_average{dimension=~'cached|free'}) by (instance) <
-    sum(netdata_system_ram_MB_average) by (instance)"
-  severity: "low"
-  tags:
-    code: ERROR_SYS_MEMORY_LIMIT
-    host: "instance"
-  details: >-
-    "RAM usage on the server '{{$labels.host}}' is approaching critical levels (free < 10%)"
-  solutions: >-
-    Check for processes using too much memory on the machine. Refer to the 'OpenIO System' graph in Grafana to
-    see memory usage per type of process.
-    If an external process uses too much memory, try to identify it, as it might have been caused by a memory leak.
-    If the process is an OpenIO service (mostly meta2), contact the support team.
-    The alert will be resolved once the used RAM is below 90%.
+      - alert: LowMemory
+        expr: 9 * sum(netdata_system_ram_MB_average{dimension!~'used'}) by (host) <
+          sum(netdata_system_ram_MB_average{dimension='used'}) by (host)
+        for: 5m
+        labels:
+          severity: low
+        annotations:
+          summary: Low on memory
+          description: >-
+            RAM usage on server '{{ $labels.host }}' is approaching critical levels.
+          solutions: >-
+            Check for processes using too much memory on the machine. Refer to the 'OpenIO System' graph in Grafana to
+            see memory usage per type of process.
+            If an external process uses too much memory, try to identify it,
+            as it might have been caused by a memory leak.
+            If the process is an OpenIO service (mostly meta2), contact the support team.
+            The alert will be resolved once the used RAM is below 90%.
 
-- name: "Diskspace is low"
-  duration: 10s
-  query: "9 * sum(netdata_disk_space_GB_average{dimension='avail'}) by (instance, family) <
-    sum(netdata_disk_space_GB_average{dimension='used'}) by (instance, family)"
-  severity: "low"
-  tags:
-    code: ERROR_SYS_DISKSPACE_LOW
-    host: "instance"
-    volume: "family"
-  details: >-
-    The partition mounted on '{{$labels.volume}}' is almost full on node '{{$labels.host}}'.
-  solutions: >-
-    If the partition is used by the system, check for processes that might use space, such as old kernels, or logs.
-    As a reminder, all OpenIO service logs are logrotated.
-    When the partition is used by an OpenIO service, it won't fill up more that 95%.
-    Prolongated service downtime may cause the storage on the platform to become unbalanced.
-    Please contact the OpenIO support team for more advice on this issue.
-    The alert will be resolved once the disk space is freed below 90% use.
+      - alert: LowDiskSpace
+        expr: 9 * sum(netdata_disk_space_GB_average{dimension='avail'}) by (host, family) <
+          sum(netdata_disk_space_GB_average{dimension='used'}) by (host, family)
+        for: 10s
+        labels:
+          severity: low
+          volume: "{{ $labels.family }}"
+        annotations:
+          summary: Low disk space
+          description: >-
+            The partition mounted on '{{ $labels.family }}' on server '{{ $labels.host }}' is almost full.
+          solutions: >-
+            If the partition is used by the system, check for processes that might use space,
+            such as old kernels, or logs.
+            As a reminder, all OpenIO service logs are logrotated.
+            When the partition is used by an OpenIO service, it won't fill up more that 95%.
+            Prolongated service downtime may cause the storage on the platform to become unbalanced.
+            Please contact the OpenIO support team for more advice on this issue.
+            The alert will be resolved once the disk space is freed below 90% use.
 
-- name: "Server errors (5xx) detected"
-  duration: 10m
-  query: "label_replace(netdata_web_log_response_codes_requests_persec_average{dimension='5xx'}, 'service', '$1/$2/$3',
-  'chart', 'web_log_\\\\.openio\\\\.(.*?)\\\\.(.*?)\\\\.(.*?)\\\\.log.*') > 0"
-  severity: "medium"
-  tags:
-    code: ERROR_SDS_HTTP_5XX_ERR
-    host: "instance"
-    service: "service"
-  details: >-
-    The service '{{$labels.service}}' on node '{{$labels.host}}' is emitting server errors.
-  solutions: >-
-    Check logfiles associated with the service (located in /var/log/oio/sds/{{$labels.service}}) for 5xx errors,
-    and contact the OpenIO support for further assistance.
-    The alert will be resolved once there are no more 5xx errors in OpenIO logs for the {{$labels.service}} service.
+      - alert: ServerErrors
+        expr: netdata_web_log_response_codes_requests_persec_average{dimension='5xx'} > 0
+        for: 10m
+        labels:
+          severity: medium
+        annotations:
+          summary: Server errors
+          description: >-
+            The service '{{ $labels.service }}' on server '{{ $labels.host }}' has had some errors.
+          solutions: >-
+            Check logfiles associated with the service for 5xx errors,
+            and contact the OpenIO support for further assistance.
+            The alert will be resolved once there are no more 5xx errors
+            in OpenIO logs for the {{ $labels.service }} service.
 
-- name: "Events buried detected"
-  duration: 10m
-  query: "sum(netdata_beanstalk_jobs_jobs_average{dimension='buried'}) by (instance) > 0"
-  severity: "low"
-  tags:
-    code: ERROR_SDS_EVENTS_BURIED
-    host: instance
-  details: >-
-    Buried events have been detected on node '{{$labels.host}}'.
-    This indicates errors in asynchronous operations that couldn't be processed.
-  solutions: >-
-    Try re-kicking the events by running <code>openio events exhume --oio-ns OPENIO</code> on each node.
-    You can check how many events are buried by running <code>openio events stats --oio-ns OPENIO</code>.
-    If the problem persists, contact the OpenIO support team.
-    The alert will be resolved once there are no more buried events on the node.
+      - alert: BuriedEvents
+        expr: sum(netdata_beanstalk_jobs_jobs_average{dimension='buried'}) by (host) > 0
+        for: 10m
+        labels:
+          severity: low
+        annotations:
+          summary: Background jobs failures
+          description: >-
+            Some background jobs on server '{{ $labels.host }}' resulted in errors and couldn't be processed.
+          solutions: >-
+            Try re-kicking the events by running <code>openio events exhume --oio-ns OPENIO</code> on each node.
+            You can check how many events are buried by running <code>openio events stats --oio-ns OPENIO</code>.
+            If the problem persists, contact the OpenIO support team.
+            The alert will be resolved once there are no more buried events on the node.
 
-- name: "Metadata service healthcheck alert"
-  duration: 30s
-  query: "probe_success{service=~'meta0|meta1|meta2'} == 0"
-  severity: "medium"
-  tags:
-    code: ERROR_SDS_META_CHECK_FAILED
-    host: "host"
-    service: "instance"
-  details: >-
-    An instance of '{{$labels.service}}' on the node '{{$labels.host}}' is failing to respond to healthcheck.
-  solutions: >-
-    Collect status by running <code>gridinit_cmd status @{{$labels.service}}</code> on the node {{$labels.host}}.
-    If the service is down, try repairing it <code>gridinit_cmd repair</code>.
-    If the service is still down, check for I/O errors and other causes preventing the service from starting.
-    Also look into the logs located in <code>/var/log/oio/sds/</code> for that particular instance.
-    If the problem perists, contact the OpenIO support.
-    The alert will be resolved once all '{{$labels.service}}' instances respond OK
-    to <code>oiotool ping IP:PORT</code> command.
+      - alert: MetaDown
+        expr: probe_success{service_type=~'meta0|meta1|meta2'} == 0
+        for: 30s
+        labels:
+          severity: medium
+        annotations:
+          summary: Metadata service down
+          description: >-
+            The service '{{ $labels.service }}' on server '{{ $labels.host }}' doesn't respond to healthchecks.
+          solutions: >-
+            Collect status by running <code>gridinit_cmd status @{{$labels.service}}</code>
+            on the node {{$labels.host}}.
+            If the service is down, try repairing it <code>gridinit_cmd repair</code>.
+            If the service is still down, check for I/O errors and other causes preventing the service from starting.
+            Also look into the logs located in <code>/var/log/oio/sds/</code> for that particular instance.
+            If the problem perists, contact the OpenIO support.
+            The alert will be resolved once all '{{$labels.service}}' instances respond OK
+            to <code>oiotool ping IP:PORT</code> command.
 
-- name: "RAWX service is down"
-  duration: 30s
-  query: "probe_success{job='rawx'} == 0"
-  severity: "low"
-  tags:
-    code: ERROR_SDS_RAWX_CHECK_FAILED
-    host: "host"
-    service: "instance"
-  details: >-
-    An instance of a RAWX service on the node '{{ $labels.host }}' located at '{{ $labels.service }}' is not responding
-    to the healthcheck.
-    This could indicate underlying data disk failure, which needs to be replaced
-  solutions: >-
-    Start by fetching the status of all services on the cluster <code>openio cluster list rawx | grep ' False '</code>.
-    Check the associated volumes for I/O errors. Replace the disks if I/O errors have been detected,
-    then try repairing by using <code>gridinit_cmd repair @rawx</code> on node '{{ $labels.host }}'.
-    Unlock the score of the service <code>openio cluster unlock rawx '{{ $labels.service }}'</code>,
-    then follow the procedure to start rebuilding data on the volume.
-    If you are not able to determine the issue, please contact the OpenIO support.
-    The alert will be resolved once the rawx instance '{{ $labels.service }}'
-    is marked as up in `openio cluster list` and is scored.
+      - alert: RawxDown
+        expr: probe_success{service_type='rawx'} == 0
+        for: 30s
+        labels:
+          severity: low
+        annotations:
+          summary: RAWX service down
+          description: >-
+            The service '{{ $labels.service }}' on server '{{ $labels.host }}' doesn't respond to healthchecks.
+            This could indicate underlying data disk failure, which needs to be replaced
+          solutions: >-
+            Start by fetching the status of all services on the cluster
+            <code>openio cluster list rawx | grep ' False '</code>.
+            Check the associated volumes for I/O errors. Replace the disks if I/O errors have been detected,
+            then try repairing by using <code>gridinit_cmd repair @rawx</code> on node '{{ $labels.host }}'.
+            Unlock the score of the service <code>openio cluster unlock rawx '{{ $labels.service }}'</code>,
+            then follow the procedure to start rebuilding data on the volume.
+            If you are not able to determine the issue, please contact the OpenIO support.
+            The alert will be resolved once the rawx instance '{{ $labels.service }}'
+            is marked as up in `openio cluster list` and is scored.
 
-- name: "Redis backend malfunction"
-  duration: 60s
-  query: "probe_success{job=~'redis|redissentinel'} == 0"
-  severity: "medium"
-  tags:
-    code: ERROR_SDS_REDIS_CHECK_FAILED
-    host: "host"
-    service: "instance"
-  details: >-
-    An redis related instance on '{{ $labels.host }}' located at '{{ $labels.service }}' is not responding
-    to the healthcheck.
-    This can cause server errors and must be investigated.
-  solutions: >-
-    Start by checking that the instance is up by running <code>gridinit_cmd status</code> on '{{ $labels.host }}'.
-    If the instance is broken, consult the logs of the service located in /var/log/oio/sds/.
-    Check that the underlying storage device is functional. If the problem persists, please contact the OpenIO support.
-    The alert will be resolved once all redis/redissentinel services are up and running.
+      - alert: RedisDown
+        expr: probe_success{service_type=~'redis|redissentinel'} == 0
+        for: 60s
+        labels:
+          severity: medium
+        annotations:
+          summary: Redis backend malfunction
+          description: >-
+            The service '{{ $labels.service }}' on server '{{ $labels.host }}' doesn't respond to healthchecks.
+            This can cause server errors and must be investigated.
+          solutions: >-
+            Start by checking that the instance is up by running <code>gridinit_cmd status</code>
+            on '{{ $labels.host }}'.
+            If the instance is broken, consult the logs of the service located in /var/log/oio/sds/.
+            Check that the underlying storage device is functional.
+            If the problem persists, please contact the OpenIO support.
+            The alert will be resolved once all redis/redissentinel services are up and running.
 
-- name: "Account service malfunction"
-  duration: 30s
-  query: "(count(probe_success{job='account'} == 1) == 0) or sum(netdata_openio_score__average{service='account'}) == 0"
-  severity: "medium"
-  tags:
-    code: ERROR_SDS_ACCOUNT_CHECK_FAILED
-  details: >-
-    The account service is experiencing issues that could cause SLA degradation and server errors.
-  solutions: >-
-    Start by checking the status of all account services by running <code>openio cluster list account</code>.
-    If you have instances marked as 'False' try repairing them by running <code>gridinit_cmd repair @account</code>
-    on the corresponding nodes. Consult the logs at /var/log/oio/sds/ for errors. If you have instances scored at 0,
-    run <code>openio cluster unlockall account</code> and check again to make sure that the score is rising.
-    If the issue persists, please contact the OpenIO support.
-    The alert will be resolved once there is at least one account instance running and scored on the cluster.
+      - alert: ServiceDown
+        expr: probe_success{service_type!~'meta\\d|redis.*|rawx|'} == 0
+        for: 60s
+        labels:
+          severity: medium
+        annotations:
+          summary: Service {{ $labels.service_type }} down
+          description: >-
+            The service '{{ $labels.service }}' on server '{{ $labels.host }}' doesn't respond to healthchecks.
 
-- name: "Metric collection failure"
-  duration: 60s
-  query: "up{job=~'blackbox|netdata'} == 0"
-  severity: "medium"
-  tags:
-    code: ERROR_SYS_MONITORING_CHECK
-    host: "instance"
-    service: "module"
-  details: >-
-    The metric collection service '{{ $labels.service }}' on node '{{ $labels.host }}' is down.
-    This prevents monitoring from working properly and must be resolved.
-  solutions: >-
-    Check the state of the service by running
-    <code>systemctl status {{ if eq $labels.service "blackbox" }}blackbox_exporter{{ else }}netdata{{ end }}.
-    If the service isn't started, start and enable it. If the service fails to start, contact the OpenIO support.
-    Check that the service is reachable, if not, make sure ports 19999 and 9115 are open.
-    You can test the availability by doing a HTTP GET request on the IP/port of the service.
-    The alert will be resolved when '{{ $labels.service }}' is up and running and can be contacted by the admin machine.
+      - alert: AccountMalfunction
+        expr: (count(probe_success{service_type='account'} == 1) == 0)
+          or sum(netdata_openio_score__average{service='account'}) == 0
+        for: 30s
+        labels:
+          severity: medium
+        annotations:
+          summary: Account service malfunction
+          description: >-
+            The account service is experiencing issues that could cause SLA degradation and server errors.
+          solutions: >-
+            Start by checking the status of all account services by running <code>openio cluster list account</code>.
+            If you have instances marked as 'False',
+            try repairing them by running <code>gridinit_cmd repair @account</code>
+            on the corresponding nodes.
+            Consult the logs at /var/log/oio/sds/ for errors. If you have instances scored at 0,
+            run <code>openio cluster unlockall account</code> and check again to make sure that the score is rising.
+            If the issue persists, please contact the OpenIO support.
+            The alert will be resolved once there is at least one account instance running and scored on the cluster.
+
+      - alert: MetricCollectionFailure
+        expr: up{job=~'blackbox|netdata'} == 0
+        for: 60s
+        labels:
+          severity: medium
+          service: "{{ $labels.module }}"
+        annotations:
+          summary: Metric collection failure
+          description: >-
+            The metric collection service '{{ $labels.module }}' on server '{{ $labels.host }}' is down.
+            This prevents monitoring from working properly and must be resolved.
+          solutions: >-
+            Check the state of the service by running
+            <code>systemctl status {{ if eq $labels.module "blackbox" }}blackbox_exporter{{ else }}netdata{{ end }}.
+            If the service isn't started, start and enable it.
+            If the service fails to start, contact the OpenIO support.
+            Check that the service is reachable, if not, make sure ports 19999 and 9115 are open.
+            You can test the availability by doing a HTTP GET request on the IP/port of the service.
+            The alert will be resolved when '{{ $labels.module }}' is up and running
+            and can be contacted by the admin machine.
 ...

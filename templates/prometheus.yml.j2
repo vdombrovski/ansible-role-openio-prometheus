@@ -17,7 +17,9 @@ scrape_configs:
   scrape_interval: 10s
   scrape_timeout:  10s
   static_configs:
-    - targets: ['{{ prometheus_bind_address }}:{{ prometheus_bind_port }}']
+    - labels:
+        host: "{{ ansible_nodename }}"
+      targets: ['{{ prometheus_bind_address }}:{{ prometheus_bind_port }}']
 
 {% if prometheus_netdata_enabled -%}
 - job_name: netdata
@@ -38,20 +40,30 @@ scrape_configs:
       regex: openio\.score;[^.]+\.([^_]+)_.+
       target_label: service
       # in: openio.score;OPENIO.account_10_240_0_23_6009
-      # out: 10_240_0_23_6009
+      # out: 10.240.0.23:6009
     - source_labels: [chart, dimension]
-      regex: openio\.score;[^.]+\.[^_]+_(.+)
+      regex: openio\.score;[^.]+\.[^_]+_(\d+)_(\d+)_(\d+)_(\d+)_(\d+)
+      replacement: ${1}.${2}.${3}.${4}:${5}
       target_label: s_instance
       # in: openio.byte_avail;OPENIO.10_240_0_23_6001.2579104859421935362
-      # out: 10_240_0_23_6001
+      # out: 10.240.0.23:6001
     - source_labels: [chart, dimension]
-      regex: openio\.byte_(?:avail|free|used);[^.]+\.([^.]+)\..+
+      regex: openio\.byte_(?:avail|free|used);[^.]+\.(\d+)_(\d+)_(\d+)_(\d+)_(\d+)\..+
+      replacement: ${1}.${2}.${3}.${4}:${5}
       target_label: s_instance
       # in: openio.rep_hits_2xx;OPENIO.10_240_0_23_6201
-      # out: 10_240_0_23_6201
+      # out: 10.240.0.23:6201
     - source_labels: [chart, dimension]
-      regex: openio.rep_hits[^;]+;[^.]+\.(.+)
+      regex: openio\.rep_hits[^;]+;[^.]+\.(\d+)_(\d+)_(\d+)_(\d+)_(\d+)
+      replacement: ${1}.${2}.${3}.${4}:${5}
       target_label: s_instance
+      # in: web_log_.openio.YOLOREM.meta2.meta2_0.log.access.response_codes
+      # out: meta2-0
+      # passing names=no to netdata would result in the same, but there could be other side-effects
+    - source_labels: [chart]
+      regex: web_log_\.(?:[^.]+\.){3}([^_]+)_(\d+)\..+
+      replacement: ${1}-${2}
+      target_label: service
 {% endif %}
 
 {% if prometheus_blackbox_enabled -%}
@@ -69,19 +81,11 @@ scrape_configs:
     - source_labels: [module]
       target_label: job
 
-    # Register the host in `host`
-    # in: worker-4,10.240.0.23=>10.240.0.24:6006
-    # out: worker-4
+    # in: 10.240.0.23=>10.240.0.24:6014
+    # out: 10.240.0.24:6014
     - source_labels: [__address__]
-      regex: ([^,]+),.+
-      target_label: host
-
-    # Strip the host in the address
-    # in: worker-4,10.240.0.23=>10.240.0.24:6006
-    # out: 10.240.0.23=>10.240.0.24:6006
-    - source_labels: [__address__]
-      regex: "[^,]+,(.+)"
-      target_label: __address__
+      regex: "[^=]+=>(.+)"
+      target_label: s_instance
 
     # Target replacements
     # in: beanstalkd;10.240.0.23=>10.240.0.24:6014
@@ -133,28 +137,6 @@ scrape_configs:
       replacement: ${1}:{{prometheus_blackbox_port}}
       target_label: __address__
 
-    # Instance replacements
-    # Default: do nothing
-    - source_labels: [__param_target]
-      target_label: instance
-
-    # Second default
-    # in: 10.240.0.24:6014
-    # out: 10_240_0_24_6014
-    # in: http://10.240.0.24:6007/healthcheck
-    # out: 10_240_0_24_6007
-    - source_labels: [__param_target]
-      regex: (?:http://)?(\d+)\.(\d+)\.(\d+)\.(\d+)\:(\d+)(?:/.+)?
-      replacement: ${1}_${2}_${3}_${4}_${5}
-      target_label: instance
-
-    # For icmpcheck: no port
-    # in: 10.240.0.23
-    # out: 10_240_0_23
-    - source_labels: [module, __param_target]
-      regex: icmpcheck;(\d+)\.(\d+)\.(\d+)\.(\d+)
-      replacement: ${1}_${2}_${3}_${4}
-      target_label: instance
 {% endif %}
 
 {% if prometheus_alertmanager_enabled %}

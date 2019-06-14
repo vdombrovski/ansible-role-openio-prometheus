@@ -67,5 +67,6 @@
   when:
     - inventory_hostname in prometheus_admin_hosts
     - _netdata_conf is changed or _prometheus_conf is changed or _prometheus_defaults is changed
-     or _prometheus_dirs is changed or _prometheus_aggr is changed or _prometheus_healthchecks is changed
+     or _prometheus_dirs is changed or _prometheus_aggr is changed
+     or _prometheus_healthchecks is changed or _prometheus_alerts is changed
 ...

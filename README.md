@@ -15,7 +15,6 @@ This role deploys a Prometheus setup, specifically tuned for the monitoring of O
 #### Groups and Network
 | Variable                     | Description                                | Type    |
 | ---------------------------- | ------------------------------------------ | ------- |
-| prometheus_admin_host        | Hostname of admin machine                  | string  |
 | prometheus_systemd_enabled   | Enable service at boot                     | boolean |
 | prometheus_systemd_limits    | Limits to setup in systemd unit file       | dict    |
 | prometheus_listen_ip         | IP address on which Prometheus will listen | string  |
@@ -39,7 +38,7 @@ This role deploys a Prometheus setup, specifically tuned for the monitoring of O
 | Variable                    | Description                                   | Type    |
 | --------------------------- | --------------------------------------------- | ------- |
 | prometheus_netdata_interval | Interval at which netdata targets are scraped | string  |
-| prometheus_netdata_targets  | List of IP:PORT of netdata targets to monitor | list    |
+| prometheus_netdata_group    | Ansible inventory netdata group               | string  |
 
 #### Collection: blackbox
 | Variable                             | Description                                                                             | Type    |

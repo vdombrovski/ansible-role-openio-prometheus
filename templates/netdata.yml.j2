@@ -1,3 +1,11 @@
+{% for host in groups[prometheus_netdata_group] %}
 - labels:
     module: netdata
-  targets: {{ prometheus_netdata_targets }}
+    host: "{{ hostvars[host].ansible_nodename }}"
+  targets:
+    {% if 'openio_bind_mgmt_address' in hostvars[host] %}
+    - {{ hostvars[host]['openio_bind_mgmt_address'] + ':' + prometheus_netdata_port|string }}
+    {% else %}
+    - {{ hostvars[host]['ansible_' + prometheus_netdata_bind_interface].ipv4.address + ':' + prometheus_netdata_port|string }}
+    {% endif %}
+{% endfor %}
