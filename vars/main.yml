@@ -7,17 +7,17 @@ prometheus_aggregation_rules:
         expr: "avg(label_replace(netdata_openio_score__average, \"dim2\", \"$1\", \"dimension\", \"(.*?)[_].*\")) \
 by (dim2)"
       - record: "aggr:netdata_web_log_bandwidth:sum"
-        expr: "sum(label_replace(netdata_web_log_bandwidth_kilobits_persec_average, \
-\"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
+        expr: "sum(label_replace(netdata_web_log_bandwidth_kilobits_persec_average, 'type','$1',\
+        'service','(.*)-.*')) by (instance, dimension, type)"
       - record: "aggr:netdata_web_log_response_codes:sum"
-        expr: "sum(label_replace(netdata_web_log_response_codes_requests_persec_average, \
-\"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
+        expr: "sum(label_replace(netdata_web_log_response_codes_requests_persec_average, 'type','$1',\
+        'service','(.*)-.*')) by (instance, dimension, type)"
       - record: "aggr:netdata_web_log_http_request_methods:sum"
-        expr: "sum(label_replace(netdata_web_log_http_method_requests_persec_average, \
-\"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
+        expr: "sum(label_replace(netdata_web_log_http_method_requests_persec_average, 'type','$1',\
+        'service','(.*)-.*')) by (instance, dimension, type)"
       - record: "aggr:netdata_web_log_response_time_ms:sum"
-        expr: "sum(label_replace(netdata_web_log_response_time_milliseconds_average, \
-\"chart2\", \"$1\", \"chart\", \".*openio[.](.*)[.].*.log.*\")) by (chart2, instance, dimension)"
+        expr: "sum(label_replace(netdata_web_log_response_time_milliseconds_average, 'type','$1',\
+        'service','(.*)-.*')) by (instance, dimension, type)"
 
 prometheus_valid_distros:
   - distro: Ubuntu
