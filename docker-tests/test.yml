@@ -18,6 +18,7 @@
       openio_repository_no_log: false
       openio_repository_mirror_host: mirror2.openio.io
     - role: role_under_test
+      prometheus_netdata_group: all
       prometheus_admin_hosts: [ 'localhost' ]
       prometheus_monitored_hosts: [ 'localhost', 'localhost' ]
 ...

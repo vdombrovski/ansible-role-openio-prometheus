@@ -28,7 +28,7 @@
 
 - name: "Setup alerting rules"
   copy:
-    content: "{{ lookup('file', 'alert_rules.yml') | format_alerts }}"
+    src: files/alert_rules.yml
     dest: "/etc/prometheus/alerts/default.rules"
   register: _prometheus_alerts
   tags: configure
