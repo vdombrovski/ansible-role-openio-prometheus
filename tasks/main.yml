@@ -3,7 +3,6 @@
 - name: "Prometheus: checks"
   include: preflight.yml
   tags:
-    - install
     - configure
 
 - block:
