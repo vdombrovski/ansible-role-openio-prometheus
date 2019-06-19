@@ -31,8 +31,6 @@ scrape_configs:
   file_sd_configs:
     - files:
       - "{{ prometheus_conf_dir }}/targets/netdata.yml"
-  static_configs:
-    - targets: []
   metric_relabel_configs:
       # in: openio.score;OPENIO.account_10_240_0_23_6009
       # out: account

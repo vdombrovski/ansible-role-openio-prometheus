@@ -1,3 +1,5 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
 {% for host in groups[prometheus_netdata_group] %}
 - labels:
     module: netdata
@@ -6,6 +8,7 @@
     {% if 'openio_bind_mgmt_address' in hostvars[host] %}
     - {{ hostvars[host]['openio_bind_mgmt_address'] + ':' + prometheus_netdata_port|string }}
     {% else %}
-    - {{ hostvars[host]['ansible_' + prometheus_netdata_bind_interface].ipv4.address + ':' + prometheus_netdata_port|string }}
+    - {{ hostvars[host]['ansible_' + prometheus_netdata_bind_interface].ipv4.address
+      + ':' + prometheus_netdata_port|string }}
     {% endif %}
 {% endfor %}
