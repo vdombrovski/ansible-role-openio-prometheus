@@ -34,15 +34,28 @@
 }
 
 @test 'Healthchecks for services defined in inventory are set up' {
-    run bash -c "docker exec -ti ${SUT_ID} grep '=>10.0.0.91:6006' /etc/prometheus/targets/blackbox.yml"
+    # OIOPROXY
+    run bash -c "docker exec -ti ${SUT_ID} grep '${SUT_IP}=>10.0.0.91:6006' /etc/prometheus/targets/blackbox.yml"
     echo "output: "$output
     [[ "${status}" -eq "0" ]]
 
-    run bash -c "docker exec -ti ${SUT_ID} grep '=>10.0.0.91:6000' /etc/prometheus/targets/blackbox.yml"
+    # CONSCIENCE
+    run bash -c "docker exec -ti ${SUT_ID} grep '${SUT_IP}=>10.0.0.91:6000' /etc/prometheus/targets/blackbox.yml"
     echo "output: "$output
     [[ "${status}" -eq "0" ]]
 
-    run bash -c "docker exec -ti ${SUT_ID} grep '=>10.0.0.91:6137' /etc/prometheus/targets/blackbox.yml"
+    # META2
+    run bash -c "docker exec -ti ${SUT_ID} grep '${SUT_IP}=>10.0.0.91:6137' /etc/prometheus/targets/blackbox.yml"
+    echo "output: "$output
+    [[ "${status}" -eq "0" ]]
+
+    # BLACKBOX SELF-CHECK
+    run bash -c "docker exec -ti ${SUT_ID} grep '${SUT_IP}=>${SUT_IP}:9115' /etc/prometheus/targets/blackbox.yml"
+    echo "output: "$output
+    [[ "${status}" -eq "0" ]]
+
+    # ICMP
+    run bash -c "docker exec -ti ${SUT_ID} grep '${SUT_IP}=>${SUT_IP}' /etc/prometheus/targets/blackbox.yml"
     echo "output: "$output
     [[ "${status}" -eq "0" ]]
 }
