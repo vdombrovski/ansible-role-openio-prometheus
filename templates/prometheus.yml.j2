@@ -32,6 +32,9 @@ scrape_configs:
     - files:
       - "{{ prometheus_conf_dir }}/targets/netdata.yml"
   metric_relabel_configs:
+    - source_labels: [__name__]
+      regex: netdata_host_tags
+      action: drop
       # in: openio.score;OPENIO.account_10_240_0_23_6009
       # out: account
     - source_labels: [chart, dimension]
@@ -62,6 +65,20 @@ scrape_configs:
       regex: web_log_\.(?:[^.]+\.){3}([^_]+)_(\d+)\..+
       replacement: ${1}-${2}
       target_label: service
+
+- job_name: netdata_tags
+  scrape_interval: {{ prometheus_netdata_tags_interval }}
+  metrics_path: "/api/v1/allmetrics"
+  params:
+    format: [prometheus_all_hosts]
+  honor_labels: true
+  file_sd_configs:
+    - files:
+      - "{{ prometheus_conf_dir }}/targets/netdata.yml"
+  metric_relabel_configs:
+    - source_labels: [__name__]
+      regex: netdata_host_tags
+      action: keep
 {% endif %}
 
 {% if prometheus_blackbox_enabled -%}

@@ -36,6 +36,7 @@ prometheus_monitored_hosts: "{{ groups['fronts'] | d([]) + groups['backs'] | d([
 
 # Collection: netdata
 prometheus_netdata_interval: 10s
+prometheus_netdata_tags_interval: 6h
 prometheus_netdata_port: 19999
 prometheus_netdata_group: netdata
 prometheus_netdata_bind_interface: "{{ openio_bind_mgmt_interface | d(ansible_default_ipv4.alias) }}"

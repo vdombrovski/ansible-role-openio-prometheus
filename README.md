@@ -35,10 +35,11 @@ This role deploys a Prometheus setup, specifically tuned for the monitoring of O
 
 
 #### Collection: netdata
-| Variable                    | Description                                   | Type    |
-| --------------------------- | --------------------------------------------- | ------- |
-| prometheus_netdata_interval | Interval at which netdata targets are scraped | string  |
-| prometheus_netdata_group    | Ansible inventory netdata group               | string  |
+| Variable                         | Description                                        | Type    |
+| -------------------------------- | -------------------------------------------------- | ------- |
+| prometheus_netdata_interval      | Interval at which netdata targets are scraped      | string  |
+| prometheus_netdata_tags_interval | Interval at which netdata targets tags are scraped | string  |
+| prometheus_netdata_group         | Ansible inventory netdata group                    | string  |
 
 #### Collection: blackbox
 | Variable                             | Description                                                                             | Type    |
