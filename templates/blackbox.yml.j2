@@ -10,9 +10,9 @@
 {% endfor %}
 
 {% for svc in prometheus_tcpcheck_services %}
-{% for hostname, data in tmp_cached_inventory.iteritems() %}
-    {% set hloop = loop %}
-    {% set src_ip = tmp_cached_node_admin_ip[tmp_cached_node_admin_ip.keys()[0 if hloop.last else hloop.index]] %}
+    {% for hostname, data in tmp_cached_inventory.iteritems() %}
+        {% set hloop = loop %}
+        {% set src_ip = tmp_cached_node_admin_ip[tmp_cached_node_admin_ip.keys()[0 if hloop.last else hloop.index]] %}
         {% for instance in data.namespaces[tmp_cached_namespace].services.get(svc, []) %}
 - labels:
     module: tcpcheck
@@ -73,16 +73,14 @@
 {% endfor %}
 
 
-{% if tmp_cached_oiofs_endpoints | length %}
-    {% for node, endpoints in tmp_cached_oiofs_endpoints.iteritems() %}
-      {% for ep in endpoints %}
+{% for node, endpoints in tmp_cached_oiofs_endpoints.iteritems() %}
+    {% for ep in endpoints %}
 - labels:
     module: oiofs
-    host: "{{ node + '-' + ep.path | d(ep.namespace | d('') + '-' + ep.account | d('') + '-' + ep.container | d('')) }}"
+    host: "{{ node }}"
     service_type: oiofs
-    service: oiofs
+    service: oiofs-{{ ep.path | d(ep.namespace | d('') + '-' + ep.account | d('') + '-' + ep.container | d('')) }}
   targets:
-      - {{ tmp_cached_node_admin_ip[node] }}=>{{ ep.http_server }}
-      {% endfor %}
+    - {{ tmp_cached_node_admin_ip[node] }}=>{{ ep.http_server }}
     {% endfor %}
-{% endif %}
+{% endfor %}
