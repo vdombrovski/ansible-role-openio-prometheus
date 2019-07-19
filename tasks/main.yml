@@ -1,13 +1,13 @@
 ---
 
 - name: "Prometheus: checks"
-  include: preflight.yml
+  include_tasks: preflight.yml
   tags:
     - configure
 
 - block:
     - name: "Prometheus: install"
-      include: "install/{{ ansible_distribution }}.yml"
+      include_tasks: "install/{{ ansible_distribution }}.yml"
       tags: install
 
     - name: 'Prometheus: Create systemd service configuration directory'
@@ -30,7 +30,7 @@
       tags: configure
 
     - name: "Prometheus: configure"
-      include: "configure.yml"
+      include_tasks: "configure.yml"
       tags: configure
 
     - name: "Prometheus: setup netdata"
@@ -44,7 +44,7 @@
   when: inventory_hostname in prometheus_admin_hosts
 
 - name: "Prometheus: setup healthchecks"
-  include: "healthchecks.yml"
+  include_tasks: "healthchecks.yml"
   when: prometheus_blackbox_enabled
   tags: configure
 
