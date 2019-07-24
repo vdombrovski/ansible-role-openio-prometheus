@@ -4,6 +4,16 @@
 # address of the System Under Test.
 
 # Tests
+run_only_test() {
+  if [[ "$SUT_IP" != "$1" ]]; then
+    skip
+  fi
+}
+
+setup() {
+  run_only_test "172.17.0.2"
+}
+
 
 @test 'Prometheus listens 9090' {
   run bash -c "curl http://${SUT_IP}:9090/metrics"

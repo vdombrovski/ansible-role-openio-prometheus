@@ -1,6 +1,7 @@
 # Test playbook
 ---
-- hosts: all
+- name: "Test playbook using management interface and address"
+  hosts: "all"
   become: true
   vars:
     namespace: TRAVIS
@@ -13,6 +14,11 @@
       copy:
         src: inventory.yml
         dest: "/etc/oio/sds/{{ namespace }}/inventory.yml"
+    - name: Setup networking
+      set_fact:
+        openio_bind_mgmt_address: "{{ ansible_eth1.ipv4.address }}"
+        openio_bind_mgmt_interface: "eth1"
+        openio_bind_address: "{{ ansible_default_ipv4.address }}"
   roles:
     - role: repo
       openio_repository_no_log: false
