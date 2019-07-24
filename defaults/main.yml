@@ -44,9 +44,6 @@ prometheus_netdata_bind_interface: "{{ openio_bind_mgmt_interface | d(ansible_de
 # Collection: blackbox
 prometheus_blackbox_interval: 10s
 prometheus_blackbox_port: 9115
-prometheus_blackbox_node_data_iface: "{{ openio_bind_interface | d(ansible_default_ipv4.alias) }}"
-prometheus_blackbox_node_admin_iface: "{{ openio_bind_mgmt_interface | d(ansible_default_ipv4.alias) }}"
-prometheus_blackbox_admin_iface: "{{ openio_bind_mgmt_interface | d(ansible_default_ipv4.alias) }}"
 
 # Collection: alertmanager
 prometheus_alertmanager_port: 9093

@@ -10,20 +10,50 @@
     tmp_cached_namespace: ""
   tags: configure
 
-- name: "Register IP of monitored node"
+- name: "Register data IP of monitored node"
   set_fact:
     prometheus_node_data_ip: "\
-      {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_data_iface]['ipv4']['address'] }}"
-    prometheus_node_admin_ip: "\
-      {{ hostvars[inventory_hostname]['ansible_' + prometheus_blackbox_node_admin_iface]['ipv4']['address'] }}"
+      {{ hostvars[inventory_hostname]['openio_bind_address'] }}"
   when: inventory_hostname in prometheus_monitored_hosts
   tags: configure
 
-- name: "Register IP of admin node"
+- name: "Register admin IP of monitored node (with mgmt interface)"
+  set_fact:
+    prometheus_node_admin_ip: "\
+        {{ hostvars[inventory_hostname].get('openio_bind_mgmt_address',
+  hostvars[inventory_hostname]['ansible_' + openio_bind_mgmt_interface]['ipv4']['address']) }}"
+  when:
+    - inventory_hostname in prometheus_monitored_hosts
+    - openio_bind_mgmt_interface is defined
+  tags: configure
+
+- name: "Register admin IP of monitored node (default)"
+  set_fact:
+    prometheus_node_admin_ip: "{{ hostvars[inventory_hostname].get('openio_bind_mgmt_address',
+  hostvars[inventory_hostname]['openio_bind_address']) }}"
+  when:
+    - inventory_hostname in prometheus_monitored_hosts
+    - openio_bind_mgmt_interface is not defined
+  tags: configure
+
+- name: "Register IP of admin node (with mgmt interface)"
   set_fact:
     prometheus_admin_ip: "\
-      {{ hostvars[inventory_hostname]['ansible_'+prometheus_blackbox_admin_iface]['ipv4']['address'] }}"
-  when: inventory_hostname in prometheus_admin_hosts
+      {{ hostvars[inventory_hostname].get('openio_bind_mgmt_address',\
+hostvars[inventory_hostname]['ansible_' + openio_bind_mgmt_interface]['ipv4']['address']) }}"
+  when:
+    - inventory_hostname in prometheus_admin_hosts
+    - openio_bind_mgmt_interface is defined
+  tags: configure
+
+- name: "Register IP of admin node (default)"
+  set_fact:
+    prometheus_admin_ip: "\
+      {{ hostvars[inventory_hostname].get('openio_bind_mgmt_address',
+hostvars[inventory_hostname]['openio_bind_address']) }}"
+  when:
+    - inventory_hostname in prometheus_admin_hosts
+    - openio_bind_mgmt_interface is not defined
   tags: configure
 
 - name: Cache hostnames

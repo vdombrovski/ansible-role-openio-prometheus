@@ -3,9 +3,6 @@
   set_fact:
     prometheus_checks:
       - distro: false
-      - blackbox_iface_node_data: true
-      - blackbox_iface_node_admin: true
-      - blackbox_iface_admin: true
       - inventory_file: true
       - monitored_hosts: true
   tags: configure
@@ -25,33 +22,6 @@
     - ansible_distribution == item.distro
     - ansible_distribution_major_version == item.version | string
   with_items: "{{ prometheus_valid_distros }}"
-  tags: configure
-
-- name: Preflight > check blackbox interface on nodes (data)
-  set_fact:
-    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_node_data': false}) }}"
-  when:
-    - prometheus_blackbox_enabled
-    - inventory_hostname in prometheus_monitored_hosts
-    - ('ansible_' + prometheus_blackbox_node_data_iface) is not defined
-  tags: configure
-
-- name: Preflight > check blackbox interface on nodes (admin)
-  set_fact:
-    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_node_admin': false}) }}"
-  when:
-    - prometheus_blackbox_enabled
-    - inventory_hostname in prometheus_monitored_hosts
-    - ('ansible_' + prometheus_blackbox_node_admin_iface) is not defined
-  tags: configure
-
-- name: Preflight > check blackbox interface on admin
-  set_fact:
-    prometheus_checks: "{{ prometheus_checks | combine({'blackbox_iface_admin': false}) }}"
-  when:
-    - prometheus_blackbox_enabled
-    - inventory_hostname in prometheus_admin_hosts
-    - ('ansible_' + prometheus_blackbox_admin_iface) is not defined
   tags: configure
 
 - name: Perform a stat on the inventory file

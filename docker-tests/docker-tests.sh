@@ -111,6 +111,8 @@ start_container() {
     "${image_tag}" \
     "${init}" \
     > "${container_id}"
+  docker network create net2 --driver bridge || true
+  docker network connect net2 $(cat ${container_id})
   set +x
 }
 
