@@ -36,7 +36,7 @@
     module: blackbox
     host: "{{ hostname }}"
   targets:
-    - {{ tmp_cached_node_data_ip[hostname] }}=>{{ tmp_cached_node_data_ip[hostname] }}:{{ prometheus_blackbox_port }}
+    - {{ tmp_cached_node_admin_ip[hostname] }}=>{{ tmp_cached_node_admin_ip[hostname] }}:{{ prometheus_blackbox_port }}
 {% endfor %}
 
 {% for svc in prometheus_oioping_services %}
