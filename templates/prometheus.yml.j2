@@ -92,9 +92,6 @@ scrape_configs:
     # Module replacements
     - source_labels: [module]
       target_label: __param_module
-    # Job replacements
-    - source_labels: [module]
-      target_label: job
 
     # in: 10.240.0.23=>10.240.0.24:6014
     # out: 10.240.0.24:6014
