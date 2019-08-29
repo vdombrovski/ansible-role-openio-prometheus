@@ -39,10 +39,12 @@ prometheus_monitored_services:
   - redissentinel
   - rdir
   - oioswift
+  - keystone
 
 prometheus_tcpcheck_services:
   - oioproxy
   - beanstalkd
+  - galera
 
 prometheus_oioping_services:
   - meta0
