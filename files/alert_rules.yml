@@ -176,6 +176,26 @@ groups:
             If the issue persists, please contact the OpenIO support.
             The alert will be resolved once there is at least one account instance running and scored on the cluster.
 
+      - alert: IAM Backend malfunction
+        expr: count(probe_success{service_type=~'galera|keystone'} == 0) > 0
+        for: 30s
+        labels:
+          severity: medium
+        annotations:
+          summary: IAM Backend malfunction
+          description: >-
+            The identity management service is malfunctioning. This could eventually result in permission denied errors
+            on the gateway.
+          solutions: >-
+            Start by checking the status of the galera mysql service by running <code>systemctl status mariadb</code>
+            Individual services can be restarted using <code>galera_recovery</code> and <code>galera_new_cluster</code>
+            commands.
+            If the backend is working, proceed to checking keystone logs and the service by issuing
+            <code>gridinit_cmd status @keystone</code>.
+            When no errors can be found, please contact the OpenIO support. If a package update, or a node configuration
+            change has been made prior to this alert, please include its details in the ticket.
+            The alert will be resolved once all instances of the IAM service are responding correctly.
+
       - alert: MetricCollectionFailure
         expr: up{job=~'blackbox|netdata'} == 0
         for: 60s
