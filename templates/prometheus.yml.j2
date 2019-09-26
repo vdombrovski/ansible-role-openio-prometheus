@@ -134,6 +134,13 @@ scrape_configs:
       replacement: http://${1}/info
       target_label: __param_target
 
+    # in: keystone;10.240.0.23=>10.240.0.24:5000
+    # out: http://10.240.0.24:5000/v3/auth/tokens
+    - source_labels: [module, __address__]
+      regex: keystone;[^=]+=>(.+)
+      replacement: http://${1}/v3/auth/tokens
+      target_label: __param_target
+
     # in: oiofs;10.240.0.23=>10.240.0.24:6999
     # out: http://10.240.0.24:6999/stats
     - source_labels: [module, __address__]
