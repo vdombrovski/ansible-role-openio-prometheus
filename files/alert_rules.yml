@@ -3,7 +3,7 @@ groups:
   - name: default
     rules:
       - alert: UnreachableNode
-        expr: probe_success{job='icmpcheck'} == 0
+        expr: probe_success{module='icmpcheck'} == 0
         for: 5m
         labels:
           severity: medium
