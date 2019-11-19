@@ -1,7 +1,9 @@
 #jinja2: lstrip_blocks: True
 # {{ ansible_managed }}
 
-{% for hostname, node_ip in tmp_cached_node_admin_ip.iteritems() %}
+{% set admin_ips = tmp_cached_node_admin_ip.keys() | list %}
+
+{% for hostname, node_ip in tmp_cached_node_admin_ip.items() | list %}
 - labels:
     module: icmpcheck
     host: "{{ hostname }}"
@@ -10,9 +12,9 @@
 {% endfor %}
 
 {% for svc in prometheus_tcpcheck_services %}
-    {% for hostname, data in tmp_cached_inventory.iteritems() %}
+    {% for hostname, data in tmp_cached_inventory.items() | list %}
         {% set hloop = loop %}
-        {% set src_ip = tmp_cached_node_admin_ip[tmp_cached_node_admin_ip.keys()[0 if hloop.last else hloop.index]] %}
+        {% set src_ip = tmp_cached_node_admin_ip[admin_ips[0 if hloop.last else hloop.index]] %}
         {% for instance in data.namespaces[tmp_cached_namespace].services.get(svc, []) %}
 - labels:
     module: tcpcheck
@@ -31,7 +33,7 @@
   targets:
     - {{ tmp_cached_admin_ip }}=>{{ tmp_cached_admin_ip }}:{{ prometheus_blackbox_port }}
 
-{% for hostname, data in tmp_cached_inventory.iteritems() %}
+{% for hostname, data in tmp_cached_inventory.items() | list %}
 - labels:
     module: blackbox
     host: "{{ hostname }}"
@@ -40,9 +42,9 @@
 {% endfor %}
 
 {% for svc in prometheus_oioping_services %}
-    {% for hostname, data in tmp_cached_inventory.iteritems() %}
+    {% for hostname, data in tmp_cached_inventory.items() | list %}
         {% set hloop = loop %}
-        {% set src_ip = tmp_cached_node_admin_ip[tmp_cached_node_admin_ip.keys()[0 if hloop.last else hloop.index]] %}
+        {% set src_ip = tmp_cached_node_admin_ip[admin_ips[0 if hloop.last else hloop.index]] %}
         {% for instance in data.namespaces[tmp_cached_namespace].services.get(svc, []) %}
 - labels:
     module: oioping
@@ -56,10 +58,10 @@
 {% endfor %}
 
 {% for module in prometheus_monitored_services %}
-    {% for hostname, data in tmp_cached_inventory.iteritems() %}
+    {% for hostname, data in tmp_cached_inventory.items() | list %}
         {% set hloop = loop %}
         {% set services = data.namespaces[tmp_cached_namespace].services %}
-        {% set src_ip = tmp_cached_node_admin_ip[tmp_cached_node_admin_ip.keys()[0 if hloop.last else hloop.index]] %}
+        {% set src_ip = tmp_cached_node_admin_ip[admin_ips[0 if hloop.last else hloop.index]] %}
         {% for instance in services.get(module, []) %}
 - labels:
     module: "{{ module }}"
@@ -73,7 +75,7 @@
 {% endfor %}
 
 
-{% for node, endpoints in tmp_cached_oiofs_endpoints.iteritems() %}
+{% for node, endpoints in tmp_cached_oiofs_endpoints.items() | list %}
     {% for ep in endpoints %}
 - labels:
     module: oiofs
