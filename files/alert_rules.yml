@@ -146,6 +146,47 @@ groups:
             If the problem persists, please contact the OpenIO support.
             The alert will be resolved once all redis/redissentinel services are up and running.
 
+      - alert: RedisNoMaster
+        expr: sum(label_replace(netdata_redis_master_master_average, 'cluster', '$1', 'family', '.*:(\\d+)'))
+          by (cluster) < 1
+        for: 30s
+        labels:
+          severity: medium
+          cluster: "{{ $labels.cluster }}"
+        annotations:
+          summary: No master found for redis cluster '{{ $labels.cluster }}'
+          description: >-
+            One of the redis clusters doesn't have a master. This may cause a complete S3 service failure,
+            and needs to be addressed.
+          solutions: >-
+            Check that all redis services are running by issuing <code>gridinit_cmd status2 @redis</code>
+            Refer to the procedure called 'Repair and diagnose account service' in your operations handbook
+            If the problem persists, please contact OpenIO support
+            The issue will be resolved once a master has been established on the redis cluster.
+
+      - alert: RedisSplitBrain
+        expr: sum(sum(label_replace(netdata_redis_replicas_count_average, 'cluster', '$1', 'family', '.*:(\\d+)'))
+          by (family, cluster) *
+          sum(label_replace(netdata_redis_master_master_average, 'cluster', '$1', 'family', '.*:(\\d+)'))
+          by (family, cluster)) by (cluster) !=
+          (count(label_replace(netdata_redis_replicas_count_average, 'cluster', '$1', 'family', '.*:(\\d+)'))
+          by (cluster) - 1)
+        for: 30s
+        labels:
+          severity: high
+          cluster: "{{ $labels.cluster }}"
+        annotations:
+          summary: Redis split brain on '{{ $labels.cluster }}'
+          description: >-
+            An unexpected redis cluster replica count. This could indicate a split-brain situation,
+            and needs to be addressed immediately
+          solutions: >-
+            Identify the redis instances part of the malfunctioning cluster.
+            You can graph the following request in Grafana:
+              <code>netdata_redis_replicas_count_average{family=~'.*:{{ $labels.cluster }}'}</code>
+            Stop all redis instances of the cluster by running <code>gridinit_cmd stop OPENIO-redis-(id)</code>
+            on them to prevent further split-brain damage. Contact OpenIO support for further steps.
+
       - alert: ServiceDown
         expr: probe_success{service_type!~'meta\\d|redis.*|rawx|'} == 0
         for: 60s
