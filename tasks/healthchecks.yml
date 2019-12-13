@@ -88,6 +88,7 @@ hostvars[inventory_hostname]['openio_bind_address']) }}"
     tmp_cached_admin_ip: "{{ prometheus_admin_ip }}"
     tmp_cached_namespace: "{{ prometheus_openio_namespace }}"
   when: inventory_hostname in prometheus_admin_hosts
+  tags: configure
 
 - name: Create temporary inventory directory
   local_action:
@@ -108,6 +109,7 @@ hostvars[inventory_hostname]['openio_bind_address']) }}"
   changed_when: false
   when: inventory_hostname in prometheus_monitored_hosts
   tags: configure
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: "Load inventories as facts"
   include_vars:
@@ -124,6 +126,7 @@ hostvars[inventory_hostname]['openio_bind_address']) }}"
     tmp_cached_inventory: "{{ tmp_cached_inventory |\
       combine({item.key: hostvars[inventory_hostname][item.value]}) }}"
   with_dict: "{{ tmp_cached_inventories }}"
+  tags: configure
   when:
     - not ansible_check_mode
     - inventory_hostname in prometheus_admin_hosts
