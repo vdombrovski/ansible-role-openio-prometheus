@@ -1,0 +1,3 @@
+---
+prometheus_defaults_var_name: ARGS
+...

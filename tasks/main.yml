@@ -1,4 +1,13 @@
 ---
+- name: "Include {{ ansible_distribution }} variables"
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}.yml"
+  tags:
+    - install
+    - configure
 
 - name: "Prometheus: checks"
   include_tasks: preflight.yml
